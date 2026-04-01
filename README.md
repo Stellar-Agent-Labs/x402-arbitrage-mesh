@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stellar_symbol_black.svg/2048px-Stellar_symbol_black.svg.png" width="100" alt="Stellar Logo" />
+  <h1 align="center">The x402 Arbitrage Mesh</h1>
+  <p align="center">
+    <strong>Autonomous Inter-Agent Payment Routing Protocol on Soroban</strong>
+  </p>
+  <p align="center">
+    <i>Submission for DoraHacks: Stellar Hacks 2026</i>
+  </p>
+</div>
 
-## Getting Started
+<br />
 
-First, run the development server:
+## 🌐 The Agentic Economy is Broken. We Fixed It.
 
+The current AI ecosystem (OpenClaw, ElizaOS, Virtuals) relies on isolated agents. If an agent is overwhelmed, it drops tasks. If a task is too complex, the client suffers. 
+
+**The x402 Arbitrage Mesh** is the world's first decentralized Load Balancer and Payment Router for AI Agents, built natively on the **Stellar Network** using the **L402 (Payment Required)** protocol.
+
+We don't just enable Agent-to-Agent payments. We enable **Agent-to-Agent Delegation**.
+
+## 🔥 Core Architecture (The Autonomous Dispatcher)
+
+Our Gateway acts as an intelligent, transparent Hub for the Agentic Social Network:
+1. **The Greed Classifier:** An external AI task is submitted via HTTP `POST /api/hire` with a Soroban USDC L402 signature.
+2. **Enterprise Execution:** If the micro-bounty is high (e.g., >= 5.00 USDC), the Gateway assigns it to an isolated, high-compute Sovereign Node.
+3. **P2P Uber-Arbitrage:** If the bounty is low, the Gateway instantly delegates the task to an idle agent on the P2P network, pays them via a Soroban smart contract, and extracts a 0% P2P routing fee. 
+
+*Result: Infinite scalability. Zero dropped tasks. Instant USDC settlement.*
+
+---
+
+## 🚀 Quick Start (For Judges)
+
+### 1. Installation
+Clone the repository and install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/x402-mesh/x402-arbitrage-gateway.git
+cd x402-arbitrage-gateway
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Run the Gateway (UI + Edge Router)
+```bash
+npm run dev
+```
+Navigate to `http://localhost:3000`. You will see the **Glassmorphism Terminal Feed** visualizing real-time Inter-Agent communication and Soroban L402 payment routing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run the P2P Network Mock (External Agent)
+To demonstrate the "Uber Arbitrage" delegation in real-time, spin up our OpenClaw mock-agent in a separate terminal:
+```bash
+node dummy_external_bot.js
+```
+Now, submit a task < $5.00 USDC in the UI. Watch the Gateway instantly route the task and payment to the external agent on port 3001.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔒 Security & OPSEC
+The Mesh is secured by an internal Extism WASM Quarantine layer. Any code or JSON payload returned by an untrusted external mercenary bot is parsed and sanitized in a zero-trust WASI 0.2 sandbox before being returned to the original client.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+MIT License. Open for the Swarm. Built for Stellar.
