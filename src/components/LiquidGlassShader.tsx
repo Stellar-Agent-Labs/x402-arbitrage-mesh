@@ -2,7 +2,10 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars } from '@react-three/drei';
+import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
+import RefractiveCore from './RefractiveCore';
 
 const PARTICLE_COUNT = 3000;
 
@@ -60,7 +63,6 @@ const vertexShader = `
     vColor = customColor;
     vec3 pos = position;
     
-    // Abstract Liquid Glass Mutation
     float phase = uTime * 0.04; 
     float n1 = snoise(pos * 0.35 + phase) * 0.9; 
     float n2 = snoise(pos.yzx * 0.35 + phase + 10.0) * 0.9;
@@ -97,7 +99,7 @@ function LiquidNebula() {
         const theta = Math.random() * 2 * Math.PI;
         const v = Math.random();
         const phi = Math.acos((2 * v) - 1); 
-        const r = 8.5 * Math.pow(Math.random(), 0.5); 
+        const r = 10 * Math.pow(Math.random(), 0.5); 
         
         pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
         pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
@@ -144,10 +146,33 @@ function LiquidNebula() {
 export default function LiquidGlassShader() {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', touchAction: 'none' }}>
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 11], fov: 45 }}>
+      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
         <color attach="background" args={['#010201']} />
+        
+        {/* Core Lighting for the Refractive Glass */}
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 10]} intensity={3} color="#00ff41" />
+        <pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
+
         <Stars radius={100} depth={50} count={6000} factor={6} saturation={0} fade speed={3} />
         <LiquidNebula />
+        <RefractiveCore />
+        
+        {/* Lusion Extreme Post-Processing */}
+        <EffectComposer disableNormalPass multisampling={4}>
+          <Bloom
+            luminanceThreshold={0.2}
+            mipmapBlur
+            intensity={1.5}
+            blendFunction={BlendFunction.ADD}
+          />
+          <ChromaticAberration
+            blendFunction={BlendFunction.NORMAL}
+            offset={new THREE.Vector2(0.003, 0.003)}
+          />
+          <Noise opacity={0.025} />
+          <Vignette eskil={false} offset={0.1} darkness={1.1} />
+        </EffectComposer>
       </Canvas>
     </div>
   );
