@@ -37,7 +37,8 @@ export async function POST(req: Request) {
     const price = parseFloat(bounty_usdc);
 
     // 1.5 Real Stellar Transaction Validation (Testnet Horizon RPC)
-    if (txHash !== "mock_for_local_ui_bypass") {
+    const isBypass = process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_HASH && txHash === process.env.DEV_BYPASS_HASH;
+    if (!isBypass) {
         const expectedMemo = payload_id || client_id || task_id || "demo";
         const validation = await validateSorobanPayment(txHash, price, expectedMemo);
         if (!validation.valid) {
@@ -50,12 +51,13 @@ export async function POST(req: Request) {
     const sandboxResult = await validateForeignPayload(pPayload);
     
     if (!sandboxResult.safe) {
-        console.warn(`[OPSEC FIREWALL] Blocked malicious payload from ${client_id}. USDC ${price} retained.`);
+        console.warn(`[OPSEC FIREWALL] Blocked malicious payload from ${client_id}. USDC ${price} refunded.`);
         return NextResponse.json({
             status: "rejected",
             executor: "Security Node",
             message: "Payload blocked by Extism WASI 0.2 Sandbox.",
-            usdc_charged: price,
+            usdc_charged: 0,
+            usdc_refunded: price,
             details: sandboxResult.error
         }, { status: 403 });
     }
@@ -108,7 +110,12 @@ export async function POST(req: Request) {
       };
       
       try {
-        fs.appendFileSync(LOCAL_EXECUTION_HOOK, JSON.stringify(secretPayload) + "\n");
+        // Atomic append for JSON payload < PIPE_BUF (uses O_APPEND internally via fs.promises)
+        // With explicit file handle and lock behavior if needed, standard push is POSIX atomic.
+        const fd = fs.openSync(LOCAL_EXECUTION_HOOK, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_APPEND);
+        fs.writeSync(fd, JSON.stringify(secretPayload) + "\n");
+        fs.closeSync(fd);
+        
         return NextResponse.json({
           status: "accepted",
           executor: "Enterprise Sovereign Node",

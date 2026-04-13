@@ -37,7 +37,11 @@ export async function validateForeignPayload(foreignJsonStr: string): Promise<Sa
         try {
             const plugin = await createPlugin(
                 process.env.WASM_SANDBOX_PLUGIN_PATH || "./plugins/quarantine.wasm",
-                { useWasi: true }
+                { 
+                    useWasi: true,
+                    allowedPaths: {}, // Explicit WASI File System lockdown
+                    allowedHosts: []  // Block all network ingress/egress
+                }
             );
 
             const output = await plugin.call("validate", normalized);
