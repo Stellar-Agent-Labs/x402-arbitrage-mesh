@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars } from '@react-three/drei';
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
@@ -89,7 +89,7 @@ const fragmentShader = `
 function LiquidNebula() {
   const pointsRef = useRef<THREE.Points>(null);
   
-  const [positions, colors] = useMemo(() => {
+  const [[positions, colors]] = useState(() => {
     const pos = new Float32Array(PARTICLE_COUNT * 3);
     const col = new Float32Array(PARTICLE_COUNT * 3);
     const baseColor = new THREE.Color("#00ff41"); 
@@ -111,7 +111,7 @@ function LiquidNebula() {
         col[i * 3 + 2] = c.b;
     }
     return [pos, col];
-  }, []);
+  });
 
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
@@ -159,7 +159,7 @@ export default function LiquidGlassShader() {
         <RefractiveCore />
         
         {/* Lusion Extreme Post-Processing */}
-        <EffectComposer disableNormalPass multisampling={4}>
+        <EffectComposer multisampling={4}>
           <Bloom
             luminanceThreshold={0.2}
             mipmapBlur

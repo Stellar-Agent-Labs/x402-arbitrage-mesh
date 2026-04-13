@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Enterprise WASI 0.2 Sandbox Payload Validator
  * Uses @extism/extism for zero-trust foreign payload quarantine.

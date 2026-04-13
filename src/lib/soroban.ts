@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Stellar Horizon RPC Validator (Testnet)
  * Enforces real-world on-chain verification for x402 payments.

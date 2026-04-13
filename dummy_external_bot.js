@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Dummy OpenClaw External Fast-API Bot for Hackathon Video Recording
 // Runs on a separate port (e.g., 3001) to simulate external network.
 

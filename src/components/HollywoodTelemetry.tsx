@@ -17,7 +17,6 @@ export default function HollywoodTelemetry() {
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    let index = 0;
     const interval = setInterval(() => {
       const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
       setLogs((prev) => {
