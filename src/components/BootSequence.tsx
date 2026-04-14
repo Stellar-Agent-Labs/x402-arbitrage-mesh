@@ -1,76 +1,89 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function BootSequence({ onComplete }: { onComplete: () => void }) {
-	const [lines, setLines] = useState<string[]>([]);
+	const [progress, setProgress] = useState(0);
 
 	useEffect(() => {
-		const sequence = [
-			"INITIATING BOOT SEQUENCE...",
-			"[OK] Kernel Memory Verified",
-			"[OK] Extism WASM Sandbox Mounted",
-			"[...] Locating P2P Arbitrage Nodes",
-			"[OK] Connected to Triarchy Swarm (3 Nodes)",
-			"ENGAGING X402 PROTOCOL...",
-			"LUSION MATRIX SYNCHRONIZED",
-			"ACCESS GRANTED."
-		];
-
-		let delay = 0;
-		sequence.forEach((line, index) => {
-			delay += Math.random() * 300 + 200;
-			setTimeout(() => {
-				setLines((prev) => [...prev, line]);
-				if (index === sequence.length - 1) {
-					setTimeout(onComplete, 800);
-				}
-			}, delay);
-		});
+		let current = 0;
+		const interval = setInterval(() => {
+			current += Math.floor(Math.random() * 15) + 3; // Fast nonlinear growth
+			if (current >= 100) {
+				current = 100;
+				clearInterval(interval);
+				setTimeout(() => onComplete(), 400); // Tiny hold at 100% then trigger dissolve
+			}
+			setProgress(current);
+		}, 70);
+		return () => clearInterval(interval);
 	}, [onComplete]);
 
 	return (
 		<motion.div
-			initial={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 1 }}
+            // Epic Lusion-style dissolve
+			exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
+			transition={{ duration: 0.8, ease: "easeIn" }}
 			style={{
 				position: "fixed",
-				top: 0,
-				left: 0,
-				width: "100vw",
-				height: "100vh",
-				backgroundColor: "#000",
-				color: "#00ff41",
-				fontFamily: "monospace",
-				padding: "5rem",
-				zIndex: 9999,
-				overflow: "hidden",
+				inset: 0,
+				background: "#010201",
+				zIndex: 99999,
 				display: "flex",
 				flexDirection: "column",
-				justifyContent: "flex-end",
+				alignItems: "center",
+				justifyContent: "center",
+				color: "#00ff41",
+				fontFamily: "monospace",
 			}}
 		>
-			{lines.map((line, i) => (
-				<motion.div
-					key={i}
-					initial={{ opacity: 0, x: -20 }}
-					animate={{ opacity: 1, x: 0 }}
-					style={{ marginBottom: "10px", fontSize: "1.2rem", fontWeight: "bold" }}
-				>
-					{line}
-				</motion.div>
-			))}
-			<div
+			<motion.div
+				initial={{ opacity: 0, scale: 0.8 }}
+				animate={{ opacity: 1, scale: 1 }}
+				transition={{ duration: 0.5 }}
+				style={{ 
+                    fontSize: "8vw", 
+                    fontWeight: "bold", 
+                    textShadow: "0 0 40px #00ff41",
+                    letterSpacing: "-0.05em"
+                }}
+			>
+				{progress}%
+			</motion.div>
+			
+            <motion.div
+                initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
 				style={{
-					height: "20px",
-					width: "10px",
-					backgroundColor: "#00ff41",
-					animation: "blink 1s step-end infinite",
-					marginTop: "10px",
+					marginTop: "2rem",
+					width: "300px",
+					height: "2px",
+					background: "rgba(0, 255, 65, 0.2)",
+					position: "relative",
+					overflow: "hidden"
 				}}
-			/>
-			<style dangerouslySetInnerHTML={{ __html: "@keyframes blink { 50% { opacity: 0; } }" }} />
+			>
+				<div style={{
+					position: "absolute",
+					top: 0, left: 0, bottom: 0,
+					width: `${progress}%`,
+					background: "#00ff41",
+					boxShadow: "0 0 15px #00ff41",
+                    transition: "width 0.1s linear"
+				}} />
+			</motion.div>
+            <motion.div 
+                initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+                style={{ 
+                    marginTop: "1.5rem", 
+                    letterSpacing: "0.2em", 
+                    fontSize: "0.8rem", 
+                    color: "rgba(0, 255, 65, 0.6)" 
+                }}
+            >
+				INITIALIZING L402 MESH PROTOCOL...
+			</motion.div>
 		</motion.div>
 	);
 }

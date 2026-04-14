@@ -1,20 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-const MESSAGES = [
-	"L1_BOOT: Extracting Extism WASM parameters...",
-	"[EXTISM] Executing Soroban Plugin <x402_gateway.wasm>",
-	"WARNING: Unsigned Memory Access Detected - Blocking.",
-	"Soroban L402 Signature Verified.",
-	"Agent Authorization Context -> ZEGION [GRANTED]",
-	"[SYNAPSE POKE] -> target: DIABLO, cmd: RUN_MERCENARY",
-	"Aegis Dome Ingress -> 0 Threats.",
-	"D2095 Matrix Synchronization Complete.",
-	"Farcaster Frame Access Token Mapped.",
-];
-
-const GENERATE_ID = () => Math.random().toString(36).substring(2, 9);
-
 export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	const [logs, setLogs] = useState<{ id: string | number; text: string }[]>([]);
 

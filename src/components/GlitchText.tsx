@@ -9,7 +9,25 @@ export default function GlitchText({ text, theme = "dark" }: { text: string; the
 	React.useEffect(() => {
 		// Trigger the entrance animation immediately on mount
 		controls.start({ opacity: 1, y: 0, rotateX: 0 });
-	}, [controls]);
+
+		// Spontaneous rare glitch on the last letter
+		const glitchTimer = setInterval(() => {
+			if (Math.random() > 0.4) {
+				controls.start((i) => {
+					if (i === text.length - 1) {
+						return {
+							x: [0, -5, 5, 0],
+							opacity: [1, 0.5, 1],
+							transition: { duration: 0.15 }
+						};
+					}
+					return {};
+				});
+			}
+		}, 3500);
+
+		return () => clearInterval(glitchTimer);
+	}, [controls, text.length]);
 
 	const triggerGlitch = async () => {
 		if (isHovered) return;
