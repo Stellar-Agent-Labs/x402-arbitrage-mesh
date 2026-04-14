@@ -48,6 +48,8 @@ const IconTier3 = () => (
 	</svg>
 );
 
+import { ParticleBackground } from "./ParticleBackground";
+
 export function AnimatedArchitecture({ theme }: { theme: "dark" | "light" }) {
 	const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
@@ -113,6 +115,8 @@ export function AnimatedArchitecture({ theme }: { theme: "dark" | "light" }) {
 	return (
 		<div style={{ position: "relative", width: "100%", maxWidth: "1000px", margin: "0 auto", padding: "2rem 0 6rem" }}>
 			
+			<ParticleBackground theme={theme} />
+
 			{/* The Info Terminal (Lusion style floating glass pane) */}
 			<div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "100%", zIndex: 100, pointerEvents: "none" }}>
 				<AnimatePresence>
