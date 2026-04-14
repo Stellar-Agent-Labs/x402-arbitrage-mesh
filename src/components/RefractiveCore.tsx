@@ -17,7 +17,7 @@ export default function RefractiveCore() {
   });
 
   return (
-    <Icosahedron ref={meshRef} args={[3.5, 0]} position={[0, 0, 0]}>
+    <Icosahedron ref={meshRef} args={[3.5, 4]} position={[0, 0, 0]}>
       <MeshTransmissionMaterial
         backside
         samples={5}

@@ -13,7 +13,7 @@ export default function Page() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center", paddingTop: "15vh", height: "100vh", padding: "2rem" }}
+        style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "15vh", height: "100vh", padding: "2rem" }}
       >
         <motion.h1 
            initial={{ scale: 0.9, opacity: 0 }}

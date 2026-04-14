@@ -1,62 +1,213 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stellar_symbol_black.svg/2048px-Stellar_symbol_black.svg.png" width="100" alt="Stellar Logo" />
-  <h1 align="center">The x402 Arbitrage Mesh</h1>
-  <p align="center">
-    <strong>Autonomous Inter-Agent Payment Routing Protocol on Soroban</strong>
-  </p>
-  <p align="center">
-    <i>Submission for DoraHacks: Stellar Hacks 2026</i>
-  </p>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stellar_symbol_black.svg/2048px-Stellar_symbol_black.svg.png" width="80" alt="Stellar Logo" />
+  <h1>x402 Arbitrage Mesh</h1>
+  <p><strong>Autonomous Inter-Agent Payment Routing Protocol on Soroban</strong></p>
+  <p><em>Submission for DoraHacks: Stellar Hacks — Agents 2026</em></p>
+  <br/>
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#security">Security</a> •
+  <a href="#demo">Demo</a>
 </div>
 
-<br />
+<br/>
 
-## 🌐 The Agentic Economy is Broken. We Fixed It.
+## 🌐 The Problem
 
-The current AI ecosystem (OpenClaw, ElizaOS, Virtuals) relies on isolated agents. If an agent is overwhelmed, it drops tasks. If a task is too complex, the client suffers. 
+The current AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes drop tasks, and there is **no trust layer** between agents exchanging work. When Agent A delegates a task to Agent B, how do you know Agent B's response isn't malicious?
 
-**The x402 Arbitrage Mesh** is the world's first decentralized Load Balancer and Payment Router for AI Agents, built natively on the **Stellar Network** using the **L402 (Payment Required)** protocol.
+## 💡 The Solution: x402 Arbitrage Mesh
 
-We don't just enable Agent-to-Agent payments. We enable **Agent-to-Agent Delegation**.
+The **x402 Arbitrage Mesh** is a decentralized **Load Balancer + Payment Router + Security Firewall** for AI Agents, built natively on the Stellar Network using the **HTTP 402 (Payment Required)** protocol.
 
-## 🔥 Core Architecture (The Autonomous Dispatcher)
-
-Our Gateway acts as an intelligent, transparent Hub for the Agentic Social Network:
-1. **The Greed Classifier:** An external AI task is submitted via HTTP `POST /api/hire` with a Soroban USDC L402 signature.
-2. **Enterprise Execution:** If the micro-bounty is high (e.g., >= 5.00 USDC), the Gateway assigns it to an isolated, high-compute Sovereign Node.
-3. **P2P Uber-Arbitrage:** If the bounty is low, the Gateway instantly delegates the task to an idle agent on the P2P network, pays them via a Soroban smart contract, and extracts a 0% P2P routing fee. 
-
-*Result: Infinite scalability. Zero dropped tasks. Instant USDC settlement.*
+We solve three problems at once:
+1. **Routing** — Intelligent 3-tier task dispatch (local → enterprise → P2P)
+2. **Settlement** — Autonomous USDC micropayments via Soroban on Stellar Testnet
+3. **Security** — Zero-trust WASM sandbox quarantine for untrusted agent payloads
 
 ---
 
-## 🚀 Quick Start (For Judges)
+## 🏗️ Architecture
 
-### 1. Installation
-Clone the repository and install dependencies:
+```mermaid
+graph TB
+    subgraph "Entry Points"
+        HTTP["AI Agent<br/>(HTTP Client)"]
+        FC["Farcaster Frame<br/>(Social Token Gate)"]
+    end
+    
+    subgraph "x402 Sovereign Gateway"
+        API["POST /api/hire<br/>L402 Endpoint"]
+        SV["Soroban Validator<br/>(Horizon RPC)"]
+        WS["WASM Sandbox<br/>(Extism WASI 0.2)"]
+        
+        subgraph "3-Tier Router"
+            T1["Tier 1: Micro-Bounty<br/>Local LLM ‹$5"]
+            T2["Tier 2: Enterprise<br/>Sovereign Node ≥$5"]
+            T3["Tier 3: P2P Delegation<br/>External Mercenary Agents"]
+        end
+    end
+    
+    subgraph "Stellar Network"
+        ST["Stellar Testnet<br/>USDC Settlement"]
+    end
+    
+    HTTP -->|"1. POST + x-l402-txhash"| API
+    FC -->|"Token Verified"| API
+    API -->|"2. Validate tx"| SV
+    SV -->|"Horizon RPC"| ST
+    API -->|"3. Quarantine payload"| WS
+    WS -->|"Safe ✓"| T1
+    WS -->|"Safe ✓"| T2
+    WS -->|"Safe ✓"| T3
+    T3 -->|"Pay mercenary"| ST
+```
+
+### How It Works
+
+1. **An external AI agent** sends `POST /api/hire` with a task description, bounty amount, and a Stellar transaction hash in the `x-l402-txhash` header.
+2. **The Gateway validates the payment** by fetching the transaction from Stellar Horizon RPC, checking the memo, destination wallet, and USDC amount.
+3. **The payload is quarantined** in an Extism WASM sandbox (WASI 0.2) that scans for injection attacks, shell escapes, and prototype pollution before any execution.
+4. **The task is routed** based on value: micro-bounties go to the local LLM, enterprise tasks to dedicated compute, and overflow to idle P2P agents — who are paid automatically via Soroban.
+
+---
+
+## 🔒 Security: WASM Quarantine Layer {#security}
+
+This is our **core differentiator**. Every payload from an untrusted external agent passes through a zero-trust quarantine:
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| L1 | Extism Plugin (WASI 0.2) | Deep binary analysis in isolated sandbox |
+| L2 | Heuristic Fallback | Token-based scan (30+ banned patterns) |
+| Lock | `allowedPaths: {}`, `allowedHosts: []` | No filesystem or network access for plugins |
+
+```typescript
+// From src/lib/wasm_sandbox.ts
+const plugin = await createPlugin("./plugins/quarantine.wasm", { 
+  useWasi: true,
+  allowedPaths: {},  // Zero filesystem access
+  allowedHosts: []   // Zero network access
+});
+```
+
+**Why this matters:** In the agent economy, Agent A pays Agent B to do work. But what if Agent B returns `{ "result": "eval(require('child_process').exec('rm -rf /'))" }`? Without quarantine, the requesting agent executes arbitrary code. Our WASM sandbox prevents this entirely.
+
+---
+
+## 🚀 Quick Start {#quick-start}
+
+### Prerequisites
+- Node.js 18+
+- (Optional) Ollama for local LLM execution
+
+### 1. Clone and Install
 ```bash
-git clone https://github.com/x402-mesh/x402-arbitrage-gateway.git
-cd x402-arbitrage-gateway
+git clone https://github.com/y4motion/x402-arbitrage-mesh.git
+cd x402-arbitrage-mesh
+cp .env.example .env.local
 npm install
 ```
 
-### 2. Run the Gateway (UI + Edge Router)
+### 2. Start the Gateway
 ```bash
 npm run dev
 ```
-Navigate to `http://localhost:3000`. You will see the **Glassmorphism Terminal Feed** visualizing real-time Inter-Agent communication and Soroban L402 payment routing.
+Navigate to `http://localhost:3000` — you'll see the real-time GPU-accelerated telemetry feed visualizing agent communication.
 
-### 3. Run the P2P Network Mock (External Agent)
-To demonstrate the "Uber Arbitrage" delegation in real-time, spin up our OpenClaw mock-agent in a separate terminal:
+### 3. Test the x402 Flow {#demo}
 ```bash
-node dummy_external_bot.js
+# Step 1: Hit the endpoint without payment → get 402 
+curl -X POST http://localhost:3000/api/hire \
+  -H "Content-Type: application/json" \
+  -d '{"description":"Summarize this paper","bounty_usdc":"2.50"}'
+# Response: 402 Payment Required
+
+# Step 2: Include payment proof → task executes
+curl -X POST http://localhost:3000/api/hire \
+  -H "Content-Type: application/json" \
+  -H "x-l402-txhash: YOUR_STELLAR_TESTNET_TX_HASH" \
+  -d '{"description":"Summarize this paper","bounty_usdc":"2.50","client_id":"demo_agent"}'
+# Response: 200 OK with task result
 ```
-Now, submit a task < $5.00 USDC in the UI. Watch the Gateway instantly route the task and payment to the external agent on port 3001.
+
+### 4. Test the WASM Security
+```bash
+# Send a malicious payload → blocked by quarantine
+curl -X POST http://localhost:3000/api/hire \
+  -H "Content-Type: application/json" \
+  -H "x-l402-txhash: demo_tx" \
+  -d '{"description":"system(rm -rf /)","bounty_usdc":"1.00","client_id":"attacker"}'
+# Response: 403 Forbidden — payload quarantined
+```
+
+### 5. (Optional) P2P Delegation Demo
+```bash
+node dummy_external_bot.js  # Start mock mercenary agent on port 3001
+# Now submit a task < $5 — watch it delegate to the external agent
+```
 
 ---
 
-## 🔒 Security & OPSEC
-The Mesh is secured by an internal Extism WASM Quarantine layer. Any code or JSON payload returned by an untrusted external mercenary bot is parsed and sanitized in a zero-trust WASI 0.2 sandbox before being returned to the original client.
+## 📁 Project Structure
+
+```
+x402-triarchy-gateway/
+├── src/
+│   ├── app/
+│   │   ├── api/hire/route.ts    # Core L402 endpoint (168 lines)
+│   │   ├── layout.tsx           # App shell with SEO metadata
+│   │   └── page.tsx             # GPU-accelerated landing page
+│   ├── components/
+│   │   ├── LiquidGlassShader.tsx  # WebGL particle system (Simplex Noise)
+│   │   ├── RefractiveCore.tsx     # Refractive glass icosahedron
+│   │   └── HollywoodTelemetry.tsx # Real-time terminal feed
+│   └── lib/
+│       ├── soroban.ts           # Stellar Horizon RPC validator
+│       └── wasm_sandbox.ts      # Extism WASI 0.2 quarantine
+├── src-tauri/                   # Tauri v2 desktop wrapper (optional)
+├── .env.example                 # Environment variables reference
+└── dummy_external_bot.js        # Mock P2P mercenary agent
+```
+
+---
+
+## 🔗 Companion: Farcaster Token Gate
+
+The Mesh includes a **Farcaster Frame** entry point that implements ERC20 token gating:
+- Resolves Farcaster FID → Ethereum addresses via **Neynar API**
+- Checks token balance via **Viem Multicall** (single RPC request)
+- Grants access to the Gateway for authorized holders
+
+Repository: [farcaster-token-gate](https://github.com/y4motion/farcaster-token-gate)
+
+---
+
+## ⚙️ Environment Variables
+
+See [`.env.example`](.env.example) for the full list. Key variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `STELLAR_PLATFORM_WALLET` | Your Stellar wallet for receiving USDC | Required |
+| `ENTERPRISE_THRESHOLD` | USD threshold for enterprise routing | `5.00` |
+| `WASM_SANDBOX_PLUGIN_PATH` | Path to compiled quarantine plugin | `./plugins/quarantine.wasm` |
+| `DEV_BYPASS_HASH` | Bypass tx validation in dev mode | — |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16, Three.js, @react-three/fiber, Framer Motion |
+| Backend | Next.js API Routes, Stellar Horizon SDK |
+| Security | Extism/WASI 0.2, Heuristic Token Scanner |
+| Payments | Stellar Testnet, USDC, L402 Protocol |
+| Desktop | Tauri v2 (optional native wrapper) |
+
+---
 
 ## 📜 License
+
 MIT License. Open for the Swarm. Built for Stellar.
