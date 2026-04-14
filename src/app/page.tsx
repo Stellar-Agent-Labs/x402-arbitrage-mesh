@@ -44,6 +44,17 @@ export default function Page() {
             [ INITIATE L402 HANDSHAKE ]
           </p>
         </motion.div>
+
+        <a 
+          href="https://github.com/y4motion/farcaster-token-gate" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ marginTop: "2rem", color: "#888", fontFamily: "monospace", textDecoration: "none", borderBottom: "1px dashed #888", paddingBottom: "2px", transition: "color 0.2s" }}
+          onMouseOver={(e) => e.currentTarget.style.color = "#00ff41"}
+          onMouseOut={(e) => e.currentTarget.style.color = "#888"}
+        >
+          Access via Farcaster Frame →
+        </a>
       </motion.div>
 
       <motion.div

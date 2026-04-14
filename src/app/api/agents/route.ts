@@ -17,7 +17,8 @@ export async function GET() {
             agents: sortedAgents
         }, { status: 200 });
         
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message || 'Registry parsing failed' }, { status: 500 });
+    } catch (e: unknown) {
+        const err = e as Error;
+        return NextResponse.json({ error: err.message || 'Registry parsing failed' }, { status: 500 });
     }
 }
