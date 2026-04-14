@@ -15,20 +15,34 @@ const MESSAGES = [
 
 const GENERATE_ID = () => Math.random().toString(36).substring(2, 9);
 
-export default function HollywoodTelemetry() {
-	const [logs, setLogs] = useState<{ id: string; text: string }[]>([]);
+export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" | "light" }) {
+	const [logs, setLogs] = useState<{ id: string | number; text: string }[]>([]);
 
+	// Simulate system initialization telemetry
 	useEffect(() => {
+		const bootLogs = [
+			"INIT_SEQUENCE_START",
+			"MOUNTING_LOCAL_FILESYSTEM...",
+			"ESTABLISHING_SECURE_TUNNEL_TO_L402...",
+			"WASM_SANDBOX_ALLOCATION: 1024MB",
+			"BYPASSING_EXTERNAL_FIREWALLS",
+			"AUTH_PROTOCOL: EXTEMPORANEOUS",
+			"SYSTEM_READY",
+		];
+
+		let i = 0;
 		const interval = setInterval(() => {
-			const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-			setLogs((prev) => {
-				const newLogs = [
+			if (i < bootLogs.length) {
+				setLogs((prev) => [
 					...prev,
-					{ id: GENERATE_ID(), text: `[${new Date().toLocaleString("en-US", { hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3 }).replace(",", "")}] ${msg}` },
-				];
-				return newLogs.slice(-15);
-			});
-		}, 850);
+					{ id: Date.now() + i, text: bootLogs[i] },
+				]);
+				i++;
+			} else {
+				clearInterval(interval);
+			}
+		}, 300);
+
 		return () => clearInterval(interval);
 	}, []);
 
@@ -40,28 +54,29 @@ export default function HollywoodTelemetry() {
 				left: 40,
 				width: 450, // Reduced from 600
 				height: 250, // Reduced from 400
-				background: "rgba(0, 10, 0, 0.85)",
-				border: "1px solid #00ff41",
+				background: theme === "dark" ? "rgba(0, 10, 0, 0.85)" : "rgba(255, 255, 255, 0.85)",
+				border: `1px solid ${theme === "dark" ? "#00ff41" : "rgba(0,0,0,0.2)"}`,
 				borderRadius: 4,
 				padding: 15, // Reduced padding
 				fontFamily: "monospace",
-				color: "#00ff41",
+				color: theme === "dark" ? "#00ff41" : "#111",
 				fontSize: 11, // Reduced font size
 				overflow: "hidden",
-				boxShadow: "0 0 25px rgba(0, 255, 65, 0.3)",
+				boxShadow: theme === "dark" ? "0 0 25px rgba(0, 255, 65, 0.3)" : "0 0 25px rgba(0, 0, 0, 0.1)",
 				backdropFilter: "blur(10px)",
 				zIndex: 20
 			}}
 		>
 			<div
 				style={{
-					borderBottom: "1px solid #00ff41",
-					paddingBottom: 10,
-					marginBottom: 15,
+					borderBottom: `1px solid ${theme === "dark" ? "#00ff41" : "rgba(0,0,0,0.2)"}`,
+					paddingBottom: 5,
+					marginBottom: 10,
+					fontSize: 12, // Reduced
 					fontWeight: "bold",
 				}}
 			>
-				x402-AEGIS-TELEMETRY // [root@triarchy-gateway]
+				&gt; TRIARCHY_SYS_OP // [root@triarchy-gateway]
 			</div>
 			<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 				{logs.map((logObj, i) => (

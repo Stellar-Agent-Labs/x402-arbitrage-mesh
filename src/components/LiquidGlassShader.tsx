@@ -92,7 +92,7 @@ const fragmentShader = `
   }
 `;
 
-function LiquidNebula() {
+function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	const pointsRef = useRef<THREE.Points>(null);
 
 	const [[positions, colors]] = useState(() => {
@@ -122,18 +122,41 @@ function LiquidNebula() {
 	const uniforms = useMemo(
 		() => ({
 			uTime: { value: 0 },
+			uTheme: { value: theme === "dark" ? 0.0 : 1.0 }, // Pass theme to shader
 		}),
-		[],
+		[theme],
 	);
+
+    // Update uniform when theme changes
+    useFrame(() => {
+        if (pointsRef.current) {
+            (pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
+        }
+    });
 
 	useFrame((state) => {
 		if (!pointsRef.current) return;
 		const time = state.clock.elapsedTime;
-		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value =
-			time;
+		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
 		pointsRef.current.rotation.y = time * 0.005;
 		pointsRef.current.rotation.x = time * 0.002;
 	});
+
+    // We inject theme logic to fragment shader
+    const themedFragmentShader = `
+      varying vec3 vColor;
+      uniform float uTheme;
+      void main() {
+        float dist = length(gl_PointCoord - vec2(0.5));
+        if (dist > 0.5) discard;
+        float alpha = 0.35 * (1.0 - dist * 2.0);
+        
+        // If theme is light, make particles grey/dark
+        vec3 finalColor = mix(vColor, vec3(0.3, 0.3, 0.3), uTheme);
+        
+        gl_FragColor = vec4(finalColor, alpha);
+      }
+    `;
 
 	return (
 		<points ref={pointsRef}>
@@ -143,17 +166,17 @@ function LiquidNebula() {
 			</bufferGeometry>
 			<shaderMaterial
 				vertexShader={vertexShader}
-				fragmentShader={fragmentShader}
+				fragmentShader={themedFragmentShader}
 				uniforms={uniforms}
 				transparent
 				depthWrite={false}
-				blending={THREE.AdditiveBlending}
+				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.MultiplyBlending}
 			/>
 		</points>
 	);
 }
 
-export default function LiquidGlassShader() {
+export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	return (
 		<div
 			style={{
@@ -165,16 +188,22 @@ export default function LiquidGlassShader() {
 			}}
 		>
 			<Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
-				<color attach="background" args={["#010201"]} />
+				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 
 				{/* Core Lighting for the Refractive Glass */}
-				<ambientLight intensity={0.5} />
-				<directionalLight
-					position={[10, 10, 10]}
-					intensity={3}
-					color="#00ff41"
-				/>
-				<pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
+				<ambientLight intensity={0.5} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
+				
+                {theme === "dark" ? (
+                    <>
+                        <directionalLight position={[10, 10, 10]} intensity={3} color="#00ff41" />
+                        <pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
+                    </>
+                ) : (
+                    <>
+                        <directionalLight position={[10, 10, 10]} intensity={1.5} color="#aaaaaa" />
+                        <pointLight position={[-10, -10, -10]} intensity={2} color="#cccccc" />
+                    </>
+                )}
 
 				<Stars
 					radius={100}
@@ -185,23 +214,23 @@ export default function LiquidGlassShader() {
 					fade
 					speed={3}
 				/>
-				<LiquidNebula />
+				<LiquidNebula theme={theme} />
 				<RefractiveCore />
 
 				{/* Lusion Extreme Post-Processing */}
 				<EffectComposer multisampling={4}>
 					<Bloom
-						luminanceThreshold={0.2}
+						luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
 						mipmapBlur
-						intensity={1.5}
-						blendFunction={BlendFunction.ADD}
+						intensity={theme === "dark" ? 1.5 : 0.2}
+						blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 					/>
 					<ChromaticAberration
 						blendFunction={BlendFunction.NORMAL}
 						offset={new THREE.Vector2(0.003, 0.003)}
 					/>
-					<Noise opacity={0.025} />
-					<Vignette eskil={false} offset={0.1} darkness={1.1} />
+					<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
+					<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
 				</EffectComposer>
 			</Canvas>
 		</div>

@@ -11,15 +11,17 @@ const AGENTS = [
 	{ id: "liquidity_sniper", task: "Flash Loans", rep: "91.4", earned: "$3,400.10", status: "ACTIVE" },
 ];
 
-export default function AgentNetworkGrid() {
+export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	return (
 		<div
 			style={{
 				padding: "4rem 10vw",
-				background: "linear-gradient(to bottom, transparent, #010a02)",
-				color: "#fff",
+				background: theme === "dark" 
+					? "linear-gradient(to bottom, transparent, #010a02)" 
+					: "linear-gradient(to bottom, transparent, #f0f0f0)",
+				color: theme === "dark" ? "#fff" : "#111",
 				fontFamily: "monospace",
-				borderTop: "1px dashed rgba(0, 255, 65, 0.3)",
+				borderTop: `1px dashed ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0,0,0,0.1)"}`,
 			}}
 		>
 			<motion.div
@@ -34,10 +36,10 @@ export default function AgentNetworkGrid() {
 					marginBottom: "3rem",
 				}}
 			>
-				<h2 style={{ color: "#00ff41", fontSize: "2rem", letterSpacing: "0.2em", margin: 0 }}>
+				<h2 style={{ color: theme === "dark" ? "#00ff41" : "#111", fontSize: "2rem", letterSpacing: "0.2em", margin: 0 }}>
 					:: LIVE AGENT REGISTRY
 				</h2>
-				<div style={{ fontSize: "1rem", color: "#888", letterSpacing: "0.1em" }}>
+				<div style={{ fontSize: "1rem", color: theme === "dark" ? "#888" : "#555", letterSpacing: "0.1em" }}>
 					NETWORK_NODES: {AGENTS.length}
 				</div>
 			</motion.div>
@@ -47,6 +49,7 @@ export default function AgentNetworkGrid() {
 					display: "grid",
 					gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
 					gap: "2rem",
+					paddingBottom: "5rem" // Space for bottom connector
 				}}
 			>
 				{AGENTS.map((agent, i) => (
@@ -58,13 +61,13 @@ export default function AgentNetworkGrid() {
 						transition={{ delay: i * 0.1, duration: 0.5 }}
 						whileHover={{
 							scale: 1.02,
-							boxShadow: "0 0 20px rgba(0, 255, 65, 0.2)",
-							borderColor: "#00ff41",
+							boxShadow: theme === "dark" ? "0 0 20px rgba(0, 255, 65, 0.2)" : "0 0 20px rgba(0,0,0,0.1)",
+							borderColor: theme === "dark" ? "#00ff41" : "#000",
 						}}
 						style={{
 							padding: "1.5rem",
-							background: "rgba(0, 20, 0, 0.4)",
-							border: "1px solid rgba(0, 255, 65, 0.1)",
+							background: theme === "dark" ? "rgba(0, 20, 0, 0.4)" : "rgba(255, 255, 255, 0.6)",
+							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.1)" : "rgba(0, 0, 0, 0.1)"}`,
 							borderRadius: "4px",
 							backdropFilter: "blur(10px)",
 							display: "flex",
@@ -80,17 +83,17 @@ export default function AgentNetworkGrid() {
 								style={{
 									padding: "2px 8px",
 									fontSize: "0.8rem",
-									border: `1px solid ${agent.status === "QUARANTINED" ? "#ff003c" : "#00ff41"}`,
-									color: agent.status === "QUARANTINED" ? "#ff003c" : "#00ff41",
+									border: `1px solid ${agent.status === "QUARANTINED" ? "#ff003c" : (theme === "dark" ? "#00ff41" : "#111")}`,
+									color: agent.status === "QUARANTINED" ? "#ff003c" : (theme === "dark" ? "#00ff41" : "#111"),
 									borderRadius: "2px",
 								}}
 							>
 								{agent.status}
 							</span>
 						</div>
-						<div style={{ color: "#888", fontSize: "0.9rem" }}>[{agent.task}]</div>
+						<div style={{ color: theme === "dark" ? "#888" : "#555", fontSize: "0.9rem" }}>[{agent.task}]</div>
 						
-						<div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem", fontSize: "0.9rem", color: "#00ff41" }}>
+						<div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem", fontSize: "0.9rem", color: theme === "dark" ? "#00ff41" : "#111" }}>
 							<span>REP: {agent.rep}</span>
 							<span>USDC: {agent.earned}</span>
 						</div>
