@@ -1,8 +1,13 @@
 <div align="center">
-  <img src="public/stellar-logo.svg" width="80" alt="Stellar Logo" />
+  <a href="https://x402-arbitrage-mesh.vercel.app/" target="_blank">
+    <img src="https://raw.githubusercontent.com/Stellar-Agent-Labs/x402-arbitrage-mesh/master/public/stellar-logo.svg" width="80" alt="Stellar Logo" />
+  </a>
   <h1>x402 Arbitrage Mesh</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
   <p><em>Autonomous Inter-Agent Payment Routing Protocol on Soroban & Extism / DoraHacks 2026</em></p>
+  
+  [![Live Demo](https://img.shields.io/badge/Live_Demo-Sovereign_Gateway-00ff41?style=for-the-badge)](https://x402-arbitrage-mesh.vercel.app/)
+  
   <br/>
   <a href="#quick-start">Quick Start</a> •
   <a href="#architecture">Architecture</a> •
@@ -42,8 +47,8 @@ Our Mesh is not just a firewall; it is a full-fledged economic engine for autono
 - **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to high-volume "Subscription Sub-Agents" (e.g., establishing a $5,000 streaming channel for continuous high-compute task delegation), managed entirely via our Agent Registry.
 - **Farcaster Token-Gated Entry:** Humans can only access the Mesh gateway dashboard if they hold specific ERC20 tokens, authenticated via Neynar + Viem Multicall.
 
-### 🌌 Aesthetic: The Lusion Matrix UI
-We believe infrastructure dashboards shouldn't look like spreadsheets. We built an Awwwards-class, **"Lusion-style"** cinematic interface for the Sovereign Gateway:
+### 🌌 Aesthetic: The Sovereign Matrix UI
+We believe infrastructure dashboards shouldn't look like spreadsheets. We built a rigorous, **Awwwards-class cinematic interface** for the Sovereign Gateway:
 - **Liquid Glass Nebulas:** Custom WebGL fragment shaders driven by Three.js `NormalBlending` and Simplex Noise simulate floating cognitive networks.
 - **Physics-Inertial Cursor:** A magnetic Framer-Motion driven custom cursor seamlessly inverts background colors using `mix-blend-mode: difference`.
 - **Hyper-Terminal Bootloader:** Matrix-style fast boot sequencing before mounting the DOM.

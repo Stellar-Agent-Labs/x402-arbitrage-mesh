@@ -203,7 +203,7 @@ export default function Page() {
 									textTransform: "uppercase",
 								}}
 							>
-								x402 protocol / Lusion Matrix
+								x402 protocol / Sovereign Matrix
 							</motion.p>
 
 							<motion.div
