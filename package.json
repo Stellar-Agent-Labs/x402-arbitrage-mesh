@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "demo": "concurrently --names gateway,bot --prefix-colors cyan,magenta \"next dev\" \"node dummy_external_bot.js\"",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tauri": "tauri dev"
   },
   "dependencies": {
     "@extism/extism": "^2.0.0-rc13",

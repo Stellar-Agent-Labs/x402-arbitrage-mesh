@@ -1,11 +1,17 @@
 "use client";
-import React, { useRef, useMemo, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Stars } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
-import * as THREE from 'three';
-import RefractiveCore from './RefractiveCore';
+import { Stars } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import {
+	Bloom,
+	ChromaticAberration,
+	EffectComposer,
+	Noise,
+	Vignette,
+} from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
+import { useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import RefractiveCore from "./RefractiveCore";
 
 const PARTICLE_COUNT = 3000;
 
@@ -87,93 +93,117 @@ const fragmentShader = `
 `;
 
 function LiquidNebula() {
-  const pointsRef = useRef<THREE.Points>(null);
-  
-  const [[positions, colors]] = useState(() => {
-    const pos = new Float32Array(PARTICLE_COUNT * 3);
-    const col = new Float32Array(PARTICLE_COUNT * 3);
-    const baseColor = new THREE.Color("#00ff41"); 
-    const secondaryColor = new THREE.Color("#0fa33a");
-    
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const theta = Math.random() * 2 * Math.PI;
-        const v = Math.random();
-        const phi = Math.acos((2 * v) - 1); 
-        const r = 10 * Math.pow(Math.random(), 0.5); 
-        
-        pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        pos[i * 3 + 2] = r * Math.cos(phi);
-        
-        const c = Math.random() > 0.5 ? baseColor : secondaryColor;
-        col[i * 3] = c.r;
-        col[i * 3 + 1] = c.g;
-        col[i * 3 + 2] = c.b;
-    }
-    return [pos, col];
-  });
+	const pointsRef = useRef<THREE.Points>(null);
 
-  const uniforms = useMemo(() => ({
-    uTime: { value: 0 },
-  }), []);
+	const [[positions, colors]] = useState(() => {
+		const pos = new Float32Array(PARTICLE_COUNT * 3);
+		const col = new Float32Array(PARTICLE_COUNT * 3);
+		const baseColor = new THREE.Color("#00ff41");
+		const secondaryColor = new THREE.Color("#0fa33a");
 
-  useFrame((state) => {
-    if (!pointsRef.current) return;
-    const time = state.clock.elapsedTime;
-    (pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
-    pointsRef.current.rotation.y = time * 0.005; 
-    pointsRef.current.rotation.x = time * 0.002; 
-  });
+		for (let i = 0; i < PARTICLE_COUNT; i++) {
+			const theta = Math.random() * 2 * Math.PI;
+			const v = Math.random();
+			const phi = Math.acos(2 * v - 1);
+			const r = 10 * Math.random() ** 0.5;
 
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
-      </bufferGeometry>
-      <shaderMaterial
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
+			pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+			pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+			pos[i * 3 + 2] = r * Math.cos(phi);
+
+			const c = Math.random() > 0.5 ? baseColor : secondaryColor;
+			col[i * 3] = c.r;
+			col[i * 3 + 1] = c.g;
+			col[i * 3 + 2] = c.b;
+		}
+		return [pos, col];
+	});
+
+	const uniforms = useMemo(
+		() => ({
+			uTime: { value: 0 },
+		}),
+		[],
+	);
+
+	useFrame((state) => {
+		if (!pointsRef.current) return;
+		const time = state.clock.elapsedTime;
+		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value =
+			time;
+		pointsRef.current.rotation.y = time * 0.005;
+		pointsRef.current.rotation.x = time * 0.002;
+	});
+
+	return (
+		<points ref={pointsRef}>
+			<bufferGeometry>
+				<bufferAttribute attach="attributes-position" args={[positions, 3]} />
+				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
+			</bufferGeometry>
+			<shaderMaterial
+				vertexShader={vertexShader}
+				fragmentShader={fragmentShader}
+				uniforms={uniforms}
+				transparent
+				depthWrite={false}
+				blending={THREE.AdditiveBlending}
+			/>
+		</points>
+	);
 }
 
 export default function LiquidGlassShader() {
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', touchAction: 'none' }}>
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
-        <color attach="background" args={['#010201']} />
-        
-        {/* Core Lighting for the Refractive Glass */}
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 10]} intensity={3} color="#00ff41" />
-        <pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
+	return (
+		<div
+			style={{
+				position: "fixed",
+				inset: 0,
+				zIndex: -1,
+				pointerEvents: "none",
+				touchAction: "none",
+			}}
+		>
+			<Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
+				<color attach="background" args={["#010201"]} />
 
-        <Stars radius={100} depth={50} count={6000} factor={6} saturation={0} fade speed={3} />
-        <LiquidNebula />
-        <RefractiveCore />
-        
-        {/* Lusion Extreme Post-Processing */}
-        <EffectComposer multisampling={4}>
-          <Bloom
-            luminanceThreshold={0.2}
-            mipmapBlur
-            intensity={1.5}
-            blendFunction={BlendFunction.ADD}
-          />
-          <ChromaticAberration
-            blendFunction={BlendFunction.NORMAL}
-            offset={new THREE.Vector2(0.003, 0.003)}
-          />
-          <Noise opacity={0.025} />
-          <Vignette eskil={false} offset={0.1} darkness={1.1} />
-        </EffectComposer>
-      </Canvas>
-    </div>
-  );
+				{/* Core Lighting for the Refractive Glass */}
+				<ambientLight intensity={0.5} />
+				<directionalLight
+					position={[10, 10, 10]}
+					intensity={3}
+					color="#00ff41"
+				/>
+				<pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
+
+				<Stars
+					radius={100}
+					depth={50}
+					count={6000}
+					factor={6}
+					saturation={0}
+					fade
+					speed={3}
+				/>
+				<LiquidNebula />
+				<RefractiveCore />
+
+				{/* Lusion Extreme Post-Processing */}
+				<EffectComposer multisampling={4}>
+					<Bloom
+						luminanceThreshold={0.2}
+						mipmapBlur
+						intensity={1.5}
+						blendFunction={BlendFunction.ADD}
+					/>
+					<ChromaticAberration
+						blendFunction={BlendFunction.NORMAL}
+						offset={new THREE.Vector2(0.003, 0.003)}
+					/>
+					<Noise opacity={0.025} />
+					<Vignette eskil={false} offset={0.1} darkness={1.1} />
+				</EffectComposer>
+			</Canvas>
+		</div>
+	);
 }
