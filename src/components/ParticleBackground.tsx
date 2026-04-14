@@ -2,8 +2,23 @@
 
 import { useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Line } from '@react-three/drei';
+import { Line, Html } from '@react-three/drei';
 import * as THREE from 'three';
+
+const nodeCenters = [
+	new THREE.Vector3(-4.5, 4.5, 0), // HTTP 
+	new THREE.Vector3(4.5, 4.5, 0),  // Farcaster 
+	new THREE.Vector3(0, 2.25, 0),   // Gateway 
+	new THREE.Vector3(0, -0.75, 1),  // WASM Sandbox Z-elevated
+	new THREE.Vector3(-4.5, -3.75, 0),// Tier 1 
+	new THREE.Vector3(0, -3.75, 0),   // Tier 2 
+	new THREE.Vector3(4.5, -3.75, 0), // Tier 3 
+];
+
+const labels = [
+	"AI Agent (HTTP)", "Farcaster Gate", "Sovereign Gateway", 
+	"WASM Sandbox", "Tier 1: Local LLM", "Tier 2: Enterprise", "Tier 3: P2P"
+];
 
 const vertexShader = `
     attribute vec3 aTarget;
@@ -43,38 +58,40 @@ const fragmentShader = `
     }
 `;
 
-function GPUPoints({ count = 8000, color = "#00ff41" }) {
+function GPUPoints({ count = 12000, color = "#00ff41" }) {
 	const materialRef = useRef<THREE.ShaderMaterial>(null);
 
 	const geometry = useMemo(() => {
 		const pos = new Float32Array(count * 3);
 		const tgt = new Float32Array(count * 3);
 
-		const nodeCenters = [
-			new THREE.Vector3(-4.5, 4.5, 0), // HTTP 
-			new THREE.Vector3(4.5, 4.5, 0),  // Farcaster 
-			new THREE.Vector3(0, 2.25, 0),   // Gateway 
-			new THREE.Vector3(0, -0.75, 1),  // WASM Sandbox Z-elevated
-			new THREE.Vector3(-4.5, -3.75, 0),// Tier 1 
-			new THREE.Vector3(0, -3.75, 0),   // Tier 2 
-			new THREE.Vector3(4.5, -3.75, 0), // Tier 3 
-		];
-
 		for (let i = 0; i < count; i++) {
-			const r = 5 + Math.random() * 8;
-			const theta = Math.random() * 2 * Math.PI;
-			const phi = Math.acos((Math.random() * 2) - 1);
-			pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-			pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-			pos[i * 3 + 2] = r * Math.cos(phi);
+			const i3 = i * 3;
+			
+			// Initial chaotic position outside bounds
+			pos[i3] = (Math.random() - 0.5) * 40;
+			pos[i3 + 1] = (Math.random() - 0.5) * 40;
+			pos[i3 + 2] = (Math.random() - 0.5) * 20;
 
-			const center = nodeCenters[Math.floor(Math.random() * nodeCenters.length)];
-			const jr = Math.random() * 1.5;
-			const jt = Math.random() * 2 * Math.PI;
-			const jp = Math.acos((Math.random() * 2) - 1);
-			tgt[i * 3] = center.x + jr * Math.sin(jp) * Math.cos(jt);
-			tgt[i * 3 + 1] = center.y + jr * Math.sin(jp) * Math.sin(jt);
-			tgt[i * 3 + 2] = center.z + jr * Math.cos(jp);
+			const nodeIndex = i % 8; // 0-6 are nodes, 7 is scattered noise
+
+			if (nodeIndex < 7) {
+				// Form the silhouette! Particles spread around the 3D bounding box of the node square.
+				const center = nodeCenters[nodeIndex];
+				const spreadX = (Math.random() - 0.5) * 3.5; // width silhouette
+				const spreadY = (Math.random() - 0.5) * 1.5; // height silhouette
+				const spreadZ = (Math.random() - 0.5) * 0.4;
+				
+				tgt[i3] = center.x + spreadX;
+				tgt[i3 + 1] = center.y + spreadY;
+				// Add a subtle curvature (like a CRT screen)
+				tgt[i3 + 2] = center.z + Math.abs(spreadX) * 0.2 + spreadZ; 
+			} else {
+				// General background noise
+				tgt[i3] = (Math.random() - 0.5) * 20;
+				tgt[i3 + 1] = (Math.random() - 0.5) * 20;
+				tgt[i3 + 2] = (Math.random() - 0.5) * 10 - 5;
+			}
 		}
 		
 		const geo = new THREE.BufferGeometry();
@@ -91,14 +108,17 @@ function GPUPoints({ count = 8000, color = "#00ff41" }) {
 
 	useFrame((state) => {
 		if (materialRef.current) {
-			materialRef.current.uniforms.time.value = state.clock.elapsedTime;
+			const t = state.clock.elapsedTime;
+			materialRef.current.uniforms.time.value = t;
 			// Use real DOM canvas bounds to precisely trigger magnetism
 			const canvasEl = state.gl.domElement;
 			const rect = canvasEl.getBoundingClientRect();
 			let progress = 1.0 - (rect.top / window.innerHeight);
-			progress = Math.max(0, Math.min(1, progress * 1.5)); // 1.5 multiplier makes it magnetize faster when in view
+			progress = Math.max(0, Math.min(1, progress * 1.5)); 
 			
-			materialRef.current.uniforms.uScroll.value += (progress - materialRef.current.uniforms.uScroll.value) * 0.05;
+			// Adding microscopic breathing (sine wave flutter) to particles when fully formed
+			const pulse = progress === 1 ? Math.sin(t * 2.0) * 0.05 : 0;
+			materialRef.current.uniforms.uScroll.value += (progress + pulse - materialRef.current.uniforms.uScroll.value) * 0.05;
 		}
 	});
 
@@ -137,40 +157,61 @@ function Splines({ color }: { color: string }) {
 		});
 	}, []);
 
-	const groupRef = useRef<THREE.Group>(null);
+	const impulsesRef = useRef<THREE.Group>(null);
 	
-	useFrame(() => {
-		if (groupRef.current) {
-			groupRef.current.children.forEach((child: any) => {
+	useFrame((state) => {
+		const t = state.clock.elapsedTime;
+		if (impulsesRef.current) {
+			impulsesRef.current.children.forEach((child: any, i: number) => {
 				if (child.material && child.material.dashOffset !== undefined) {
-					child.material.dashOffset -= 0.008;
+					// Physical impulse flowing down the channel
+					child.material.dashOffset -= 0.015;
+					// Unpredictable disruption (flickering neural logic)
+					const disruption = Math.sin(t * 4 + i * 11) * Math.sin(t * 1.5);
+					child.material.opacity = disruption > 0 ? 0.9 : 0.05;
 				}
 			});
 		}
 	});
 
 	return (
-		<group ref={groupRef}>
+		<group>
+			{/* Glass Sheath: Almost invisible, thick outer tube */}
 			{paths.map((pts, i) => (
 				<Line 
-					key={i} 
+					key={`glass-${i}`} 
 					points={pts} 
 					color={color} 
-					lineWidth={2.5} 
-					dashed 
-					dashScale={15} 
-					dashSize={0.8} 
-					dashOffset={0} 
+					lineWidth={4.5} 
 					transparent 
-					opacity={0.8} 
+					opacity={0.06} 
 				/>
 			))}
+			
+			{/* Core Impulse: Intense dashed light running completely inside the glass tube */}
+			<group ref={impulsesRef}>
+				{paths.map((pts, i) => (
+					<Line 
+						key={`impulse-${i}`} 
+						points={pts} 
+						color={color} 
+						lineWidth={1.5} 
+						dashed 
+						dashScale={8} 
+						dashSize={0.6} 
+						dashOffset={0} 
+						transparent 
+						opacity={0.9} 
+					/>
+				))}
+			</group>
 		</group>
 	);
 }
 
 export function ParticleBackground({ theme }: { theme: "light" | "dark" }) {
 	const color = theme === "dark" ? "#00ff41" : "#000000";
+	const textColor = theme === "dark" ? "#D1FFD7" : "#111"; // Bright neon-mint text for dark mode
 
 	return (
 		<div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: "100%", height: "80%", zIndex: 0, pointerEvents: "none", opacity: theme === "dark" ? 0.9 : 0.3 }}>
@@ -178,6 +219,25 @@ export function ParticleBackground({ theme }: { theme: "light" | "dark" }) {
 				<ambientLight intensity={0.5} />
 				<GPUPoints color={color} count={12000} />
 				<Splines color={color} />
+				
+				{/* WebGL Native DOM Nodes Overlay */}
+				{nodeCenters.map((center, i) => (
+					<Html key={i} position={center} center zIndexRange={[100, 0]}>
+						<div style={{
+							color: textColor,
+							fontFamily: "monospace",
+							fontSize: "13px",
+							fontWeight: "bold",
+							textTransform: "uppercase",
+							letterSpacing: "0.15em",
+							whiteSpace: "nowrap",
+							textShadow: theme === "dark" ? "0 0 15px rgba(0,255,65,0.8), 0 0 30px rgba(0,255,65,0.4)" : "none",
+							pointerEvents: "none",
+						}}>
+							{labels[i]}
+						</div>
+					</Html>
+				))}
 			</Canvas>
 		</div>
 	);
