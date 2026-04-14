@@ -220,11 +220,11 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 16, Three.js, @react-three/fiber, Framer Motion |
-| Backend | Next.js API Routes, Stellar Horizon SDK |
-| Security | Extism/WASI 0.2, Heuristic Token Scanner |
+| Frontend | Next.js 16.2.2, React 19.2.4, Three.js 183.2, Framer Motion 12 |
+| Backend | Next.js API Routes, Stellar Horizon RPC (Native fetch) |
+| Security | Extism 2.0.0-rc13 (WASI 0.2), Heuristic Token Scanner |
 | Payments | Stellar Testnet, USDC, L402 Protocol |
-| Desktop | Tauri v2 (optional native wrapper) |
+| Desktop | Tauri 2.10 (optional native wrapper) |
 
 ---
 
