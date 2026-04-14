@@ -287,6 +287,85 @@ export default function Page() {
 						</motion.div>
 					</div>
 
+					{/* SYSTEM ARCHITECTURE SECTION */}
+					<section style={{ position: "relative", zIndex: 10, padding: "8rem 2rem", maxWidth: 1200, margin: "0 auto", color: theme === "dark" ? "#fff" : "#111" }}>
+						<motion.h2 
+							initial={{ opacity: 0, y: 20 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+							style={{ fontFamily: "monospace", fontSize: "2rem", borderBottom: `1px solid ${theme === "dark" ? "#00ff41" : "#333"}`, paddingBottom: "1rem", marginBottom: "4rem" }}
+						>
+							[ SYSTEM_ARCHITECTURE ]
+						</motion.h2>
+
+						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+							{[
+								{ title: "L402 Payment Layer", desc: "Autonomous USDC micropayments via Soroban on Stellar Testnet. Zero free-riding for resource-heavy AI inferences.", icon: "💸" },
+								{ title: "WASM Quarantine", desc: "Extism WASI 0.2 executing untrusted AI payloads with 0ms cold-start latency. Zero filesystem or network access.", icon: "🛑" },
+								{ title: "Sovereign Routing", desc: "3-tier intelligent dispatch (Local LLM → Enterprise Node → P2P Mercenary Delegation) based on bounty value and grid topology.", icon: "🌐" }
+							].map((feature, idx) => (
+								<motion.div
+									key={idx}
+									initial={{ opacity: 0, y: 30 }}
+									whileInView={{ opacity: 1, y: 0 }}
+									viewport={{ once: true }}
+									transition={{ delay: idx * 0.2 }}
+									whileHover={{ y: -5, boxShadow: theme === "dark" ? "0 10px 40px rgba(0,255,65,0.15)" : "0 10px 40px rgba(0,0,0,0.1)" }}
+									style={{
+										padding: "2rem",
+										border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0, 0, 0, 0.15)"}`,
+										borderRadius: "8px",
+										background: theme === "dark" ? "rgba(0, 15, 0, 0.6)" : "rgba(255, 255, 255, 0.8)",
+										backdropFilter: "blur(10px)",
+									}}
+								>
+									<div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{feature.icon}</div>
+									<h3 style={{ fontFamily: "monospace", color: theme === "dark" ? "#00ff41" : "#111", fontSize: "1.2rem", marginBottom: "1rem" }}>{feature.title}</h3>
+									<p style={{ fontFamily: "sans-serif", lineHeight: 1.6, color: theme === "dark" ? "#aaa" : "#555" }}>{feature.desc}</p>
+								</motion.div>
+							))}
+						</div>
+					</section>
+
+					{/* SOVEREIGN MANIFESTO & FOOTER */}
+					<footer style={{ position: "relative", zIndex: 10, borderTop: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0,0,0,0.1)"}`, padding: "6rem 2rem 4rem", marginTop: "4rem", background: theme === "dark" ? "rgba(0,10,0,0.7)" : "rgba(255,255,255,0.7)", backdropFilter: "blur(15px)" }}>
+						<div style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
+							<h2 style={{ fontFamily: "monospace", fontSize: "2.5rem", color: theme === "dark" ? "#00ff41" : "#111", marginBottom: "2rem", letterSpacing: "0.1em" }}>
+								THE MESH MANIFESTO
+							</h2>
+							<p style={{ fontFamily: "sans-serif", fontSize: "1.2rem", lineHeight: 1.8, color: theme === "dark" ? "#ccc" : "#444", maxWidth: 800, margin: "0 auto 4rem" }}>
+								Other solutions build single, isolated AI agents holding private keys, blindly trusting inputs, and bleeding liquidity. We built the <strong>Immune System</strong> for the entire AI economy. By becoming a Sovereign Integrator, you align your nodes with zero-trust execution and global liquidity flow. Connect your bots, define your rules, and route your intelligence through the gateway.
+							</p>
+							
+							<motion.a
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+								href="https://github.com/Stellar-Agent-Labs/x402-arbitrage-mesh"
+								target="_blank"
+								rel="noopener noreferrer"
+								style={{
+									display: "inline-block",
+									padding: "1rem 3rem",
+									background: theme === "dark" ? "#00ff41" : "#111",
+									color: theme === "dark" ? "#000" : "#fff",
+									fontFamily: "monospace",
+									fontWeight: "bold",
+									textDecoration: "none",
+									borderRadius: "4px",
+									letterSpacing: "0.1em",
+									boxShadow: theme === "dark" ? "0 0 30px rgba(0, 255, 65, 0.4)" : "0 8px 30px rgba(0, 0, 0, 0.3)",
+									transition: "opacity 0.2s"
+								}}
+							>
+								[ CONNECT SOVEREIGN NODE ]
+							</motion.a>
+							
+							<div style={{ marginTop: "6rem", fontFamily: "monospace", color: theme === "dark" ? "#555" : "#999", fontSize: "0.9rem" }}>
+								© {new Date().getFullYear()} Stellar Agent Labs // x402 Global Routing Grid
+							</div>
+						</div>
+					</footer>
+
 					<AgentNetworkGrid theme={theme} />
 				</>
 			)}

@@ -15,21 +15,45 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 			"AUTH_PROTOCOL: EXTEMPORANEOUS",
 			"SYSTEM_READY",
 		];
+		
+		const liveTelemetryNodes = [
+			"PING_EXTERNAL_NODE_: ",
+			"L402_MEMPOOL_SYNC: ",
+			"PACKET_INSPECTED_OK: 0x",
+			"QUARANTINE_THREAD_SLEEP: ",
+			"WASI_0.2_HEARTBEAT: OK",
+			"P2P_NODE_DISCOVERY: SCANNING",
+			"SOROBAN_RPC_LATENCY: ",
+			"EXTISM_PLUGIN_LIFECYCLE: ",
+			"SOVEREIGN_ROUTING_HOP: "
+		];
 
 		let i = 0;
-		const interval = setInterval(() => {
+		let timeoutId: NodeJS.Timeout;
+
+		const streamLogs = () => {
 			if (i < bootLogs.length) {
 				setLogs((prev) => [
-					...prev,
+					...prev.slice(-6),
 					{ id: Date.now() + i, text: bootLogs[i] },
 				]);
 				i++;
+				timeoutId = setTimeout(streamLogs, 300);
 			} else {
-				clearInterval(interval);
+				// Infinite dynamic stream
+				const randomLog = liveTelemetryNodes[Math.floor(Math.random() * liveTelemetryNodes.length)];
+				const suffix = randomLog.endsWith(": ") ? Math.floor(Math.random() * 9999).toString(16).toUpperCase() + "ms" : "";
+				
+				setLogs((prev) => {
+					const newArray = [...prev, { id: Date.now(), text: randomLog + suffix }];
+					return newArray.length > 7 ? newArray.slice(newArray.length - 7) : newArray;
+				});
+				timeoutId = setTimeout(streamLogs, 800 + Math.random() * 2000);
 			}
-		}, 300);
+		};
 
-		return () => clearInterval(interval);
+		timeoutId = setTimeout(streamLogs, 300);
+		return () => clearTimeout(timeoutId);
 	}, []);
 
 	return (
