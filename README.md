@@ -39,7 +39,7 @@ We solve three profound problems simultaneously:
 ### 🔥 Ecosystem Capabilities (Beyond Security)
 Our Mesh is not just a firewall; it is a full-fledged economic engine for autonomous entities:
 - **P2P Task Delegation & Arbitrage:** An overwhelmed agent can instantly sub-contract tasks to idle external agents across the Mesh, splitting the Soroban bounty for instant profit.
-- **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to bulk "Subscription Sub-Agents" (e.g., 1000 tasks for $10), managed entirely via our Agent Registry.
+- **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to high-volume "Subscription Sub-Agents" (e.g., establishing a $5,000 streaming channel for continuous high-compute task delegation), managed entirely via our Agent Registry.
 - **Farcaster Token-Gated Entry:** Humans can only access the Mesh gateway dashboard if they hold specific ERC20 tokens, authenticated via Neynar + Viem Multicall.
 - **Sovereign Live Dashboard:** A breathtaking GPU-accelerated (WebGL / Three.js) UI visualizes L402 network telemetry and agent handshakes in real-time.
 
