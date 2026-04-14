@@ -132,7 +132,6 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 		pointsRef.current.rotation.x = time * 0.002;
 	});
 
-    // We inject theme logic to fragment shader
     const themedFragmentShader = `
       varying vec3 vColor;
       uniform float uTheme;
@@ -142,7 +141,7 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
         float alpha = 0.35 * (1.0 - dist * 2.0);
         
         // If theme is light, make particles grey/dark
-        vec3 finalColor = mix(vColor, vec3(0.3, 0.3, 0.3), uTheme);
+        vec3 finalColor = mix(vColor, vec3(0.05, 0.05, 0.05), uTheme);
         
         gl_FragColor = vec4(finalColor, alpha);
       }
@@ -160,7 +159,7 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 				uniforms={uniforms}
 				transparent
 				depthWrite={false}
-				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.MultiplyBlending}
+				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
 			/>
 		</points>
 	);

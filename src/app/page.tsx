@@ -149,10 +149,10 @@ export default function Page() {
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
 						style={{
-							position: "absolute",
-							top: 30,
+							position: "fixed",
+							bottom: 40,
 							right: 40,
-							zIndex: 50,
+							zIndex: 100,
 							padding: "10px 24px",
 							background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
 							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
@@ -271,7 +271,7 @@ export default function Page() {
 									paddingBottom: "2px",
 									transition: "color 0.2s",
 								}}
-								onMouseOver={(e) => (e.currentTarget.style.color = "#00ff41")}
+								onMouseOver={(e) => (e.currentTarget.style.color = theme === "dark" ? "#00ff41" : "#111")}
 								onMouseOut={(e) => (e.currentTarget.style.color = "#888")}
 							>
 								Access via Farcaster Frame →
@@ -283,7 +283,7 @@ export default function Page() {
 							animate={{ opacity: 1, x: 0 }}
 							transition={{ delay: 2, duration: 1 }}
 						>
-							<HollywoodTelemetry />
+							<HollywoodTelemetry theme={theme} />
 						</motion.div>
 					</div>
 
