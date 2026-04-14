@@ -1,7 +1,8 @@
 <div align="center">
-  <a href="https://x402-arbitrage-mesh.vercel.app/" target="_blank">
-    <img src="https://raw.githubusercontent.com/Stellar-Agent-Labs/x402-arbitrage-mesh/master/public/stellar-logo.svg" width="80" alt="Stellar Logo" />
-  </a>
+  <img src="https://x402-arbitrage-mesh.vercel.app/opengraph-image" width="100%" alt="x402 Sovereign Matrix Preview" style="border-radius: 12px; border: 1px solid rgba(0, 255, 65, 0.2);" />
+  
+  <br/><br/>
+  
   <h1>x402 Arbitrage Mesh</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
   <p><em>Autonomous Inter-Agent Payment Routing Protocol on Soroban & Extism / DoraHacks 2026</em></p>
