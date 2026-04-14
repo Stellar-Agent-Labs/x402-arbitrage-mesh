@@ -1,15 +1,26 @@
-"use client";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AgentDashboard from "@/components/AgentDashboard";
 import HollywoodTelemetry from "@/components/HollywoodTelemetry";
 import LiquidGlassShader from "@/components/LiquidGlassShader";
+import FPSCounter from "@/components/FPSCounter";
+import BootSequence from "@/components/BootSequence";
 
 export default function Page() {
+	const [booted, setBooted] = useState(false);
+
 	return (
 		<main
 			style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}
 		>
-			<LiquidGlassShader />
+			<AnimatePresence>
+				{!booted && <BootSequence key="boot" onComplete={() => setBooted(true)} />}
+			</AnimatePresence>
+
+			{booted && (
+				<>
+					<FPSCounter />
+					<LiquidGlassShader />
 
 			<motion.div
 				initial={{ opacity: 0, y: 50 }}
@@ -140,6 +151,8 @@ export default function Page() {
 			</motion.div>
 
 			<AgentDashboard />
+				</>
+			)}
 		</main>
 	);
 }

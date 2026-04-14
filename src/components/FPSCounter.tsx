@@ -1,0 +1,45 @@
+"use client";
+import React, { useState, useEffect } from "react";
+
+export default function FPSCounter() {
+	const [fps, setFps] = useState(0);
+
+	useEffect(() => {
+		let frameCount = 0;
+		let lastTime = performance.now();
+		let requestRef: number;
+
+		const countFrames = (time: number) => {
+			frameCount++;
+			if (time - lastTime >= 1000) {
+				setFps(frameCount);
+				frameCount = 0;
+				lastTime = time;
+			}
+			requestRef = requestAnimationFrame(countFrames);
+		};
+
+		requestRef = requestAnimationFrame(countFrames);
+		return () => cancelAnimationFrame(requestRef);
+	}, []);
+
+	return (
+		<div
+			style={{
+				position: "absolute",
+				top: 40,
+				right: 40,
+				background: "rgba(0, 10, 0, 0.85)",
+				border: "1px solid #00ff41",
+				padding: "10px 15px",
+				fontFamily: "monospace",
+				color: "#00ff41",
+				fontSize: 14,
+				boxShadow: "0 0 15px rgba(0, 255, 65, 0.3)",
+				zIndex: 100,
+			}}
+		>
+			<span style={{ opacity: 0.7 }}>SYS.FPS //</span> {fps}
+		</div>
+	);
+}
