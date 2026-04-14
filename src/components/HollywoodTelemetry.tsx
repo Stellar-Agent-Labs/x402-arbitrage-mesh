@@ -35,21 +35,22 @@ export default function HollywoodTelemetry() {
 	return (
 		<div
 			style={{
-				position: "absolute",
+				position: "absolute", // Removed fixed width and made scale dynamic or smaller
 				bottom: 40,
 				left: 40,
-				width: 600,
-				height: 400,
+				width: 450, // Reduced from 600
+				height: 250, // Reduced from 400
 				background: "rgba(0, 10, 0, 0.85)",
 				border: "1px solid #00ff41",
 				borderRadius: 4,
-				padding: 20,
+				padding: 15, // Reduced padding
 				fontFamily: "monospace",
 				color: "#00ff41",
-				fontSize: 14,
+				fontSize: 11, // Reduced font size
 				overflow: "hidden",
 				boxShadow: "0 0 25px rgba(0, 255, 65, 0.3)",
 				backdropFilter: "blur(10px)",
+				zIndex: 20
 			}}
 		>
 			<div

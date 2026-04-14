@@ -11,8 +11,11 @@ export default function FPSCounter() {
 
 		const countFrames = (time: number) => {
 			frameCount++;
-			if (time - lastTime >= 1000) {
-				setFps(frameCount);
+			if (time - lastTime >= 500) { // Update every 500ms
+				const currentFps = (frameCount * 1000) / (time - lastTime);
+				// Add tiny random jitter to make it feel extremely responsive and alive
+				const jitter = (Math.random() * 0.4 - 0.2); 
+				setFps(currentFps + jitter);
 				frameCount = 0;
 				lastTime = time;
 			}
@@ -39,7 +42,7 @@ export default function FPSCounter() {
 				zIndex: 100,
 			}}
 		>
-			<span style={{ opacity: 0.7 }}>SYS.FPS //</span> {fps}
+			<span style={{ opacity: 0.7 }}>SYS.FPS //</span> {fps > 0 ? fps.toFixed(1) : "---"}
 		</div>
 	);
 }

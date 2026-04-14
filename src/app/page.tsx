@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AgentDashboard from "@/components/AgentDashboard";
 import HollywoodTelemetry from "@/components/HollywoodTelemetry";
 import LiquidGlassShader from "@/components/LiquidGlassShader";
 import FPSCounter from "@/components/FPSCounter";
@@ -23,7 +22,7 @@ export default function Page() {
 			{booted && (
 				<>
 					<FPSCounter />
-					<div style={{ position: "relative", height: "100vh", width: "100%" }}>
+					<div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
 						<LiquidGlassShader />
 
 						<motion.div
@@ -38,8 +37,9 @@ export default function Page() {
 								alignItems: "center",
 								justifyContent: "center",
 								paddingTop: "15vh",
-								height: "100%",
+								minHeight: "100vh",
 								padding: "2rem",
+								paddingBottom: "15rem" // Prevent overlap with absolute telemetry
 							}}
 						>
 							<GlitchText text="SOVEREIGN GATEWAY" />
@@ -139,8 +139,6 @@ export default function Page() {
 						>
 							<HollywoodTelemetry />
 						</motion.div>
-
-						<AgentDashboard />
 					</div>
 
 					<AgentNetworkGrid />
