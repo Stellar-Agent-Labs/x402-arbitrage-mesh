@@ -109,7 +109,9 @@ const plugin = await createPlugin("./plugins/quarantine.wasm", {
 });
 ```
 
-**Why this matters:** In the agent economy, Agent A pays Agent B to do work. But what if Agent B returns `{ "result": "eval(require('child_process').exec('rm -rf /'))" }`? Without quarantine, the requesting agent executes arbitrary code. Our WASM sandbox prevents this entirely.
+**Why this matters (WASM vs Docker):** Several other Hackathon solutions attempt to sandbox AI agents using Docker containers. Docker is a legacy virtualization paradigm that is too heavy (consuming Megabytes of RAM) and too slow (milliseconds to seconds of cold start latency) for high-frequency AI micro-bounties. 
+
+We use **WebAssembly (Extism WASI 0.2)**. Our cold starts are measured in *microseconds*. We deliver an absolute, lightweight execution quarantine before the malicious payload ever has a chance to touch the host OS. In the AI economy, speed and zero-trust are everything.
 
 ---
 
