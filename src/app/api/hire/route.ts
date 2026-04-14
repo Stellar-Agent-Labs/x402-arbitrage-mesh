@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import * as fs from "fs";
 import { validateSorobanPayment } from "@/lib/soroban";
 import { validateForeignPayload } from "@/lib/wasm_sandbox";
+import { AgentRegistry } from "@/lib/agent_registry";
 
 // Configuration: Environment-driven routing parameters
 const LOCAL_EXECUTION_HOOK = process.env.LOCAL_EXECUTION_HOOK;
@@ -15,6 +16,7 @@ export async function POST(req: Request) {
     // 1. Validate x402 (Payment Required)
     const authHeader = req.headers.get("authorization") || req.headers.get("x-l402-txhash");
     let txHash = req.headers.get("x-l402-txhash");
+    const l402Mode = req.headers.get("x-l402-mode"); // Absorbed from Credio
     if (!txHash && authHeader && authHeader.startsWith("L402 ")) {
         txHash = authHeader.split(" ")[1];
     }
@@ -22,6 +24,12 @@ export async function POST(req: Request) {
     // Bypass check locally for UI testing if in DEV mode without real frontend yet
     // But OPSEC mandate: We must have real validation logic. 
     if (!txHash) {
+      if (l402Mode === 'subscription') {
+          return NextResponse.json(
+             { error: "Subscription Payment Required. Please provide valid recurring txhash via L402." },
+             { status: 402, headers: { "WWW-Authenticate": 'L402 invoice="soroban_subscription_required"' } }
+          );
+      }
       return NextResponse.json(
         { error: "Payment Required. Please provide x-l402-txhash header with a valid Stellar Testnet Transaction Hash." },
         { status: 402, headers: { "WWW-Authenticate": 'L402 invoice="soroban_payment_required"' } }
@@ -85,6 +93,7 @@ export async function POST(req: Request) {
         });
         if (ollamaResp.ok) {
             const ollamaData = await ollamaResp.json();
+            AgentRegistry.updateStats(client_id || "micro_node_auto", price);
             return NextResponse.json({
                 status: "completed",
                 executor: "Local Micro-Node",
@@ -117,6 +126,8 @@ export async function POST(req: Request) {
         fs.writeSync(fd, JSON.stringify(secretPayload) + "\n");
         fs.closeSync(fd);
         
+        AgentRegistry.updateStats(client_id || "enterprise_node_auto", price);
+
         return NextResponse.json({
           status: "accepted",
           executor: "Enterprise Sovereign Node",
@@ -149,6 +160,9 @@ export async function POST(req: Request) {
     } catch (e) {
       console.warn("Dummy bot at 3001 is offline. Run 'node dummy_external_bot.js' in a separate terminal.");
     }
+
+    AgentRegistry.updateStats(client_id || "remote_mercenary", foreignPrice);
+    AgentRegistry.updateStats("gateway_router", networkFee); // The router itself keeps the fee
 
     return NextResponse.json({
       status: "delegated",

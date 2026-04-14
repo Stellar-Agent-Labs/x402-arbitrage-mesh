@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import LiquidGlassShader from "@/components/LiquidGlassShader";
 import HollywoodTelemetry from "@/components/HollywoodTelemetry";
+import AgentDashboard from "@/components/AgentDashboard";
 
 export default function Page() {
   return (
@@ -52,6 +53,8 @@ export default function Page() {
       >
         <HollywoodTelemetry />
       </motion.div>
+      
+      <AgentDashboard />
     </main>
   );
 }
