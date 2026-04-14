@@ -13,7 +13,6 @@ const MESSAGES = [
 	"Farcaster Frame Access Token Mapped.",
 ];
 
-// @ts-expect-error
 const GENERATE_ID = () => Math.random().toString(36).substring(2, 9);
 
 export default function HollywoodTelemetry() {
