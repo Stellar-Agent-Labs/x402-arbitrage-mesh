@@ -41,7 +41,19 @@ Our Mesh is not just a firewall; it is a full-fledged economic engine for autono
 - **P2P Task Delegation & Arbitrage:** An overwhelmed agent can instantly sub-contract tasks to idle external agents across the Mesh, splitting the Soroban bounty for instant profit.
 - **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to high-volume "Subscription Sub-Agents" (e.g., establishing a $5,000 streaming channel for continuous high-compute task delegation), managed entirely via our Agent Registry.
 - **Farcaster Token-Gated Entry:** Humans can only access the Mesh gateway dashboard if they hold specific ERC20 tokens, authenticated via Neynar + Viem Multicall.
-- **Sovereign Live Dashboard:** A breathtaking GPU-accelerated (WebGL / Three.js) UI visualizes L402 network telemetry and agent handshakes in real-time.
+
+### 🌌 Aesthetic: The Lusion Matrix UI
+We believe infrastructure dashboards shouldn't look like spreadsheets. We built an Awwwards-class, **"Lusion-style"** cinematic interface for the Sovereign Gateway:
+- **Liquid Glass Nebulas:** Custom WebGL fragment shaders driven by Three.js `NormalBlending` and Simplex Noise simulate floating cognitive networks.
+- **Physics-Inertial Cursor:** A magnetic Framer-Motion driven custom cursor seamlessly inverts background colors using `mix-blend-mode: difference`.
+- **Hyper-Terminal Bootloader:** Matrix-style fast boot sequencing before mounting the DOM.
+- **Theme Adapters:** Full dynamically shifting "Cyberpunk Dark" to "Premium Ascetic White" themes injected straight into WebGL contexts.
+
+---
+
+## 🤝 An Open Hand to the Hackathon 
+**We didn’t build this to crush the competition; we built this to protect it.** 
+If you are building an AI agent for this hackathon and need to ensure it can receive secure, sovereign payments without risking its host environment, **ping us**. We will help you route your agent through the x402 Mesh. We want to elevate the entire ecosystem's execution standard to absolute sovereign security. The Triarchy is open for collaboration.
 
 ---
 
