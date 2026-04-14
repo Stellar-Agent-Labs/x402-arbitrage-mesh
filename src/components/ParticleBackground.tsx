@@ -51,13 +51,13 @@ function GPUPoints({ count = 8000, color = "#00ff41" }) {
 		const tgt = new Float32Array(count * 3);
 
 		const nodeCenters = [
-			new THREE.Vector3(-4.5, 3, 0),
-			new THREE.Vector3(4.5, 3, 0),
-			new THREE.Vector3(0, 1.5, 0),
-			new THREE.Vector3(0, -1.5, 1),
-			new THREE.Vector3(-4.5, -4, 0),
-			new THREE.Vector3(0, -4, 0),
-			new THREE.Vector3(4.5, -4, 0),
+			new THREE.Vector3(-4.5, 4.5, 0), // HTTP 
+			new THREE.Vector3(4.5, 4.5, 0),  // Farcaster 
+			new THREE.Vector3(0, 2.25, 0),   // Gateway 
+			new THREE.Vector3(0, -0.75, 1),  // WASM Sandbox Z-elevated
+			new THREE.Vector3(-4.5, -3.75, 0),// Tier 1 
+			new THREE.Vector3(0, -3.75, 0),   // Tier 2 
+			new THREE.Vector3(4.5, -3.75, 0), // Tier 3 
 		];
 
 		for (let i = 0; i < count; i++) {
@@ -92,8 +92,12 @@ function GPUPoints({ count = 8000, color = "#00ff41" }) {
 	useFrame((state) => {
 		if (materialRef.current) {
 			materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-			let progress = (window.scrollY - 300) / 600;
-			progress = Math.max(0, Math.min(1, progress));
+			// Use real DOM canvas bounds to precisely trigger magnetism
+			const canvasEl = state.gl.domElement;
+			const rect = canvasEl.getBoundingClientRect();
+			let progress = 1.0 - (rect.top / window.innerHeight);
+			progress = Math.max(0, Math.min(1, progress * 1.5)); // 1.5 multiplier makes it magnetize faster when in view
+			
 			materialRef.current.uniforms.uScroll.value += (progress - materialRef.current.uniforms.uScroll.value) * 0.05;
 		}
 	});
@@ -116,12 +120,12 @@ function GPUPoints({ count = 8000, color = "#00ff41" }) {
 function Splines({ color }: { color: string }) {
 	const paths = useMemo(() => {
 		const curves = [
-			[[-4.5, 3, 0], [0, 2.25, 2], [0, 1.5, 0]],
-			[[4.5, 3, 0], [0, 2.25, 2], [0, 1.5, 0]],
-			[[0, 1.5, 0], [0, 0, 2], [0, -1.5, 1]],
-			[[0, -1.5, 1], [-2.25, -2.75, 2], [-4.5, -4, 0]],
-			[[0, -1.5, 1], [0, -2.75, 2], [0, -4, 0]],
-			[[0, -1.5, 1], [2.25, -2.75, 2], [4.5, -4, 0]],
+			[[-4.5, 4.5, 0], [0, 3.375, 1], [0, 2.25, 0]],
+			[[4.5, 4.5, 0], [0, 3.375, 1], [0, 2.25, 0]],
+			[[0, 2.25, 0], [0, 0.75, 1.5], [0, -0.75, 1]],
+			[[0, -0.75, 1], [-2.25, -2.25, 1.5], [-4.5, -3.75, 0]],
+			[[0, -0.75, 1], [0, -2.25, 1.5], [0, -3.75, 0]],
+			[[0, -0.75, 1], [2.25, -2.25, 1.5], [4.5, -3.75, 0]],
 		];
 		return curves.map(pts => {
 			const curve = new THREE.QuadraticBezierCurve3(
@@ -133,10 +137,33 @@ function Splines({ color }: { color: string }) {
 		});
 	}, []);
 
+	const groupRef = useRef<THREE.Group>(null);
+	
+	useFrame(() => {
+		if (groupRef.current) {
+			groupRef.current.children.forEach((child: any) => {
+				if (child.material && child.material.dashOffset !== undefined) {
+					child.material.dashOffset -= 0.008;
+				}
+			});
+		}
+	});
+
 	return (
-		<group>
+		<group ref={groupRef}>
 			{paths.map((pts, i) => (
-				<Line key={i} points={pts} color={color} lineWidth={1.5} transparent opacity={0.4} />
+				<Line 
+					key={i} 
+					points={pts} 
+					color={color} 
+					lineWidth={2.5} 
+					dashed 
+					dashScale={15} 
+					dashSize={0.8} 
+					dashOffset={0} 
+					transparent 
+					opacity={0.8} 
+				/>
 			))}
 		</group>
 	);

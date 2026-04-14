@@ -63,11 +63,12 @@ function ScrollLogo({ theme }: { theme: "dark" | "light" }) {
 }
 
 function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
+	const { scrollYProgress } = useScroll();
+	const yMove = useTransform(scrollYProgress, [0.65, 0.8], [150, 0]);
+	const opac = useTransform(scrollYProgress, [0.65, 0.8], [0, 1]);
+
     return (
         <motion.div
-            initial={{ y: 100, opacity: 0, x: "-50%" }}
-            animate={{ y: 0, opacity: 1, x: "-50%" }}
-            transition={{ delay: 2, type: "spring", stiffness: 100 }}
             style={{
                 position: "fixed",
                 bottom: 40,
@@ -81,7 +82,10 @@ function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "20px",
-                boxShadow: theme === "dark" ? "0 0 20px rgba(0,255,65,0.2)" : "0 5px 20px rgba(0,0,0,0.1)"
+                boxShadow: theme === "dark" ? "0 0 20px rgba(0,255,65,0.2)" : "0 5px 20px rgba(0,0,0,0.1)",
+				y: yMove,
+				opacity: opac,
+				x: "-50%"
             }}
         >
             <span style={{ 
@@ -121,6 +125,7 @@ import GlitchText from "@/components/GlitchText";
 import AgentNetworkGrid from "@/components/AgentNetworkGrid";
 import CustomCursor from "@/components/CustomCursor";
 import { AnimatedArchitecture } from "@/components/AnimatedArchitecture";
+import Magnetic from "@/components/Magnetic";
 
 export default function Page() {
 	const [booted, setBooted] = useState(false);
@@ -142,66 +147,64 @@ export default function Page() {
 					<FloatingConnector theme={theme} />
 
 					{/* Theme Switcher Button */}
-					<motion.button
-						onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-						initial={{ opacity: 0, y: -20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 1, duration: 1 }}
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						style={{
-							position: "fixed",
-							bottom: 40,
-							right: 40,
-							zIndex: 100,
-							padding: "10px 24px",
-							background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
-							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
-							color: theme === "dark" ? "#00ff41" : "#111",
-							backdropFilter: "blur(10px)",
-							cursor: "pointer",
-							fontFamily: "monospace",
-							borderRadius: "30px",
-							fontWeight: "bold",
-							letterSpacing: "0.1em",
-						}}
-					>
-						{theme === "dark" ? "◉ DARK" : "◌ LIGHT"}
-					</motion.button>
+					<Magnetic strength={0.4} style={{ position: "fixed", bottom: 40, right: 40, zIndex: 100 }}>
+						<motion.button
+							onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+							initial={{ opacity: 0, y: -20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 1, duration: 1 }}
+							whileHover={{ scale: 1.05, backgroundColor: theme === "dark" ? "#00ff41" : "#111", color: theme === "dark" ? "#000" : "#fff" }}
+							whileTap={{ scale: 0.95 }}
+							style={{
+								padding: "10px 24px",
+								background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
+								border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
+								color: theme === "dark" ? "#00ff41" : "#111",
+								backdropFilter: "blur(10px)",
+								cursor: "pointer",
+								fontFamily: "monospace",
+								borderRadius: "30px",
+								fontWeight: "bold",
+								letterSpacing: "0.1em",
+								transition: "background-color 0.3s, color 0.3s",
+							}}
+						>
+							{theme === "dark" ? "◉ DARK" : "◌ LIGHT"}
+						</motion.button>
+					</Magnetic>
 					
 					{/* GitHub Fixed Button */}
-					<motion.a
-						href="https://github.com/Stellar-Agent-Labs"
-						target="_blank"
-						rel="noopener noreferrer"
-						initial={{ opacity: 0, scale: 0.8 }}
-						animate={{ opacity: 1, scale: 1 }}
-						transition={{ delay: 1.2, duration: 1 }}
-						whileHover={{ scale: 1.1, rotate: 5 }}
-						whileTap={{ scale: 0.9 }}
-						style={{
-							position: "fixed",
-							bottom: 40,
-							right: 170, // Placed to the left of Theme Switcher
-							zIndex: 100,
-							width: 44,
-							height: 44,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-							background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
-							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
-							color: theme === "dark" ? "#00ff41" : "#111",
-							backdropFilter: "blur(10px)",
-							cursor: "pointer",
-							borderRadius: "50%",
-							boxShadow: theme === "dark" ? "0 0 20px rgba(0, 255, 65, 0.3)" : "0 5px 15px rgba(0,0,0,0.1)",
-						}}
-					>
-						<svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor">
-							<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-						</svg>
-					</motion.a>
+					<Magnetic strength={0.4} style={{ position: "fixed", bottom: 40, right: 170, zIndex: 100 }}>
+						<motion.a
+							href="https://github.com/Stellar-Agent-Labs"
+							target="_blank"
+							rel="noopener noreferrer"
+							initial={{ opacity: 0, scale: 0.8 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{ delay: 1.2, duration: 1 }}
+							whileHover={{ scale: 1.1, backgroundColor: theme === "dark" ? "#00ff41" : "#111", color: theme === "dark" ? "#000" : "#fff" }}
+							whileTap={{ scale: 0.9 }}
+							style={{
+								width: 44,
+								height: 44,
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
+								border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
+								color: theme === "dark" ? "#00ff41" : "#111",
+								backdropFilter: "blur(10px)",
+								cursor: "pointer",
+								borderRadius: "50%",
+								boxShadow: theme === "dark" ? "0 0 20px rgba(0, 255, 65, 0.3)" : "0 5px 15px rgba(0,0,0,0.1)",
+								transition: "background-color 0.3s, color 0.3s",
+							}}
+						>
+							<svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor">
+								<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+							</svg>
+						</motion.a>
+					</Magnetic>
 
 					<div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
 						<LiquidGlassShader theme={theme} />
