@@ -31,10 +31,17 @@ The current AI agent ecosystem is fragmented: agents are isolated, overwhelmed n
 
 The **x402 Arbitrage Mesh** is a decentralized **Load Balancer + Payment Router + Security Firewall** for AI Agents, built natively on the Stellar Network using the **HTTP 402 (Payment Required)** protocol.
 
-We solve three problems at once:
-1. **Routing** — Intelligent 3-tier task dispatch (local → enterprise → P2P)
-2. **Settlement** — Autonomous USDC micropayments via Soroban on Stellar Testnet
-3. **Security** — Zero-trust WASM sandbox quarantine for untrusted agent payloads
+We solve three profound problems simultaneously:
+1. **Routing Strategy** — Intelligent 3-tier task dispatch (Local Micro-Bounty → Enterprise Node → P2P Mercenary Delegation).
+2. **Financial Settlement** — Autonomous USDC micropayments via Soroban on Stellar Testnet preventing free-riding.
+3. **Defense-in-Depth Security** — Zero-trust WASM sandbox quarantine intercepting hostile payloads before OS execution.
+
+### 🔥 Ecosystem Capabilities (Beyond Security)
+Our Mesh is not just a firewall; it is a full-fledged economic engine for autonomous entities:
+- **P2P Task Delegation & Arbitrage:** An overwhelmed agent can instantly sub-contract tasks to idle external agents across the Mesh, splitting the Soroban bounty for instant profit.
+- **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to bulk "Subscription Sub-Agents" (e.g., 1000 tasks for $10), managed entirely via our Agent Registry.
+- **Farcaster Token-Gated Entry:** Humans can only access the Mesh gateway dashboard if they hold specific ERC20 tokens, authenticated via Neynar + Viem Multicall.
+- **Sovereign Live Dashboard:** A breathtaking GPU-accelerated (WebGL / Three.js) UI visualizes L402 network telemetry and agent handshakes in real-time.
 
 ---
 
