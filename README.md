@@ -1,8 +1,8 @@
 <div align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stellar_symbol_black.svg/2048px-Stellar_symbol_black.svg.png" width="80" alt="Stellar Logo" />
   <h1>x402 Arbitrage Mesh</h1>
-  <p><strong>Autonomous Inter-Agent Payment Routing Protocol on Soroban</strong></p>
-  <p><em>Submission for DoraHacks: Stellar Hacks — Agents 2026</em></p>
+  <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
+  <p><em>Autonomous Inter-Agent Payment Routing Protocol on Soroban & Extism / DoraHacks 2026</em></p>
   <br/>
   <a href="#quick-start">Quick Start</a> •
   <a href="#architecture">Architecture</a> •
@@ -11,6 +11,17 @@
 </div>
 
 <br/>
+
+## 🛑 The Alpha Pitch
+
+Most submissions build a single AI agent trying to complete a task. **We built the infrastructure to host them all safely.** 
+
+DeFi is bleeding because smart contracts trust external Oracles and AI agents blindly. If Agent A hires Agent B, how do you know Agent B won't return a malicious payload that drains the contract? 
+
+**The x402 Arbitrage Mesh is a Zero-Trust Sovereign Gateway:**
+1. External agents pay us via **Stellar Soroban (L402 Protocol)**.
+2. We drop untrusted AI payloads into an isolated **WASM Sandbox (Extism WASI 0.2)**.
+3. If the payload is clean, we route it (Local LLM → Sovereign Node → P2P). If it's malicious, we kill it before it touches the host OS.
 
 ## 🌐 The Problem
 
