@@ -167,6 +167,40 @@ export default function Page() {
 					>
 						{theme === "dark" ? "◉ DARK" : "◌ LIGHT"}
 					</motion.button>
+					
+					{/* GitHub Fixed Button */}
+					<motion.a
+						href="https://github.com/Stellar-Agent-Labs"
+						target="_blank"
+						rel="noopener noreferrer"
+						initial={{ opacity: 0, scale: 0.8 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ delay: 1.2, duration: 1 }}
+						whileHover={{ scale: 1.1, rotate: 5 }}
+						whileTap={{ scale: 0.9 }}
+						style={{
+							position: "fixed",
+							bottom: 40,
+							right: 170, // Placed to the left of Theme Switcher
+							zIndex: 100,
+							width: 44,
+							height: 44,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							background: theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(255,255,255,0.7)",
+							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.5)" : "rgba(0, 0, 0, 0.2)"}`,
+							color: theme === "dark" ? "#00ff41" : "#111",
+							backdropFilter: "blur(10px)",
+							cursor: "pointer",
+							borderRadius: "50%",
+							boxShadow: theme === "dark" ? "0 0 20px rgba(0, 255, 65, 0.3)" : "0 5px 15px rgba(0,0,0,0.1)",
+						}}
+					>
+						<svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor">
+							<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+						</svg>
+					</motion.a>
 
 					<div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
 						<LiquidGlassShader theme={theme} />
@@ -298,34 +332,36 @@ export default function Page() {
 							[ SYSTEM_ARCHITECTURE ]
 						</motion.h2>
 
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-							{[
-								{ title: "L402 Payment Layer", desc: "Autonomous USDC micropayments via Soroban on Stellar Testnet. Zero free-riding for resource-heavy AI inferences.", icon: "💸" },
-								{ title: "WASM Quarantine", desc: "Extism WASI 0.2 executing untrusted AI payloads with 0ms cold-start latency. Zero filesystem or network access.", icon: "🛑" },
-								{ title: "Sovereign Routing", desc: "3-tier intelligent dispatch (Local LLM → Enterprise Node → P2P Mercenary Delegation) based on bounty value and grid topology.", icon: "🌐" }
-							].map((feature, idx) => (
-								<motion.div
-									key={idx}
-									initial={{ opacity: 0, y: 30 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ delay: idx * 0.2 }}
-									whileHover={{ y: -5, boxShadow: theme === "dark" ? "0 10px 40px rgba(0,255,65,0.15)" : "0 10px 40px rgba(0,0,0,0.1)" }}
-									style={{
-										padding: "2rem",
-										border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0, 0, 0, 0.15)"}`,
-										borderRadius: "8px",
-										background: theme === "dark" ? "rgba(0, 15, 0, 0.6)" : "rgba(255, 255, 255, 0.8)",
-										backdropFilter: "blur(10px)",
-									}}
-								>
-									<div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{feature.icon}</div>
-									<h3 style={{ fontFamily: "monospace", color: theme === "dark" ? "#00ff41" : "#111", fontSize: "1.2rem", marginBottom: "1rem" }}>{feature.title}</h3>
-									<p style={{ fontFamily: "sans-serif", lineHeight: 1.6, color: theme === "dark" ? "#aaa" : "#555" }}>{feature.desc}</p>
-								</motion.div>
-							))}
-						</div>
+						<motion.div 
+							initial={{ opacity: 0, scale: 0.95 }}
+							whileInView={{ opacity: 1, scale: 1 }}
+							viewport={{ once: true }}
+							transition={{ duration: 0.8 }}
+							style={{ 
+								width: "100%", 
+								borderRadius: "12px", 
+								overflow: "hidden",
+								border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.4)" : "rgba(0, 0, 0, 0.2)"}`,
+								boxShadow: theme === "dark" ? "0 0 50px rgba(0, 255, 65, 0.15)" : "0 20px 50px rgba(0, 0, 0, 0.1)",
+								background: theme === "dark" ? "#000" : "#fff",
+								padding: "1rem"
+							}}
+						>
+							<img 
+								src="/architecture.png" 
+								alt="Sovereign x402 Architecture" 
+								style={{ 
+									width: "100%", 
+									height: "auto", 
+									display: "block",
+									filter: theme === "light" ? "invert(1) hue-rotate(180deg)" : "none"
+								}} 
+							/>
+						</motion.div>
 					</section>
+
+					{/* AGENT REGISTRY MUST BE ABOVE FOOTER */}
+					<AgentNetworkGrid theme={theme} />
 
 					{/* SOVEREIGN MANIFESTO & FOOTER */}
 					<footer style={{ position: "relative", zIndex: 10, borderTop: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0,0,0,0.1)"}`, padding: "6rem 2rem 4rem", marginTop: "4rem", background: theme === "dark" ? "rgba(0,10,0,0.7)" : "rgba(255,255,255,0.7)", backdropFilter: "blur(15px)" }}>
@@ -365,8 +401,6 @@ export default function Page() {
 							</div>
 						</div>
 					</footer>
-
-					<AgentNetworkGrid theme={theme} />
 				</>
 			)}
 		</main>
