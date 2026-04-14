@@ -120,6 +120,7 @@ import BootSequence from "@/components/BootSequence";
 import GlitchText from "@/components/GlitchText";
 import AgentNetworkGrid from "@/components/AgentNetworkGrid";
 import CustomCursor from "@/components/CustomCursor";
+import { AnimatedArchitecture } from "@/components/AnimatedArchitecture";
 
 export default function Page() {
 	const [booted, setBooted] = useState(false);
@@ -332,32 +333,7 @@ export default function Page() {
 							[ SYSTEM_ARCHITECTURE ]
 						</motion.h2>
 
-						<motion.div 
-							initial={{ opacity: 0, scale: 0.95 }}
-							whileInView={{ opacity: 1, scale: 1 }}
-							viewport={{ once: true }}
-							transition={{ duration: 0.8 }}
-							style={{ 
-								width: "100%", 
-								borderRadius: "12px", 
-								overflow: "hidden",
-								border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.4)" : "rgba(0, 0, 0, 0.2)"}`,
-								boxShadow: theme === "dark" ? "0 0 50px rgba(0, 255, 65, 0.15)" : "0 20px 50px rgba(0, 0, 0, 0.1)",
-								background: theme === "dark" ? "#000" : "#fff",
-								padding: "1rem"
-							}}
-						>
-							<img 
-								src="/architecture.png" 
-								alt="Sovereign x402 Architecture" 
-								style={{ 
-									width: "100%", 
-									height: "auto", 
-									display: "block",
-									filter: theme === "light" ? "invert(1) hue-rotate(180deg)" : "none"
-								}} 
-							/>
-						</motion.div>
+						<AnimatedArchitecture theme={theme} />
 					</section>
 
 					{/* AGENT REGISTRY MUST BE ABOVE FOOTER */}
