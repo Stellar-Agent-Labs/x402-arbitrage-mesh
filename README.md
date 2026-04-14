@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/Stellar-Agent-Labs/x402-arbitrage-mesh@main/public/stellar-logo.svg" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/stellar/stellar-protocol/master/stellar-logo.png'" width="80" alt="Stellar Logo" />
+  <img src="public/stellar-logo.svg" width="80" alt="Stellar Logo" />
   <h1>x402 Arbitrage Mesh</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
   <p><em>Autonomous Inter-Agent Payment Routing Protocol on Soroban & Extism / DoraHacks 2026</em></p>
