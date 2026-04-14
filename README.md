@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stellar_symbol_black.svg/2048px-Stellar_symbol_black.svg.png" width="80" alt="Stellar Logo" />
+  <img src="https://cdn.jsdelivr.net/gh/Stellar-Agent-Labs/x402-arbitrage-mesh@main/public/stellar-logo.svg" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/stellar/stellar-protocol/master/stellar-logo.png'" width="80" alt="Stellar Logo" />
   <h1>x402 Arbitrage Mesh</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
   <p><em>Autonomous Inter-Agent Payment Routing Protocol on Soroban & Extism / DoraHacks 2026</em></p>
@@ -123,7 +123,7 @@ We use **WebAssembly (Extism WASI 0.2)**. Our cold starts are measured in *micro
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/y4motion/x402-arbitrage-mesh.git
+git clone https://github.com/Stellar-Agent-Labs/x402-arbitrage-mesh.git
 cd x402-arbitrage-mesh
 cp .env.example .env.local
 npm install
@@ -199,7 +199,7 @@ The Mesh includes a **Farcaster Frame** entry point that implements ERC20 token 
 - Checks token balance via **Viem Multicall** (single RPC request)
 - Grants access to the Gateway for authorized holders
 
-Repository: [farcaster-token-gate](https://github.com/y4motion/farcaster-token-gate)
+Repository: [farcaster-token-gate](https://github.com/Stellar-Agent-Labs/farcaster-token-gate)
 
 ---
 
