@@ -204,9 +204,9 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 ---
 
-## 🛠️ The Triarchy Cyber-Stack (48H Sprint Maximum)
+## 🛠️ The Triarchy Cyber-Stack
 
-This platform was engineered from the ground up for Stellar Hacks. We deployed an uncompromising, multi-disciplinary tech stack representing thousands of lines of sovereign architecture integrated within 48 hours.
+This platform was engineered from the ground up to establish absolute sovereign security for the Agentic Web. We deployed an uncompromising, multi-disciplinary tech stack representing thousands of lines of hardware-accelerated, zero-trust architecture.
 
 | Architectural Layer | Core Technologies | Subsystems & Focus |
 |---------------------|-------------------|--------------------|
