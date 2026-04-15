@@ -14,7 +14,7 @@ export async function GET() {
 
 		return NextResponse.json(
 			{
-				organization: "Stellar Agent Labs",
+				organization: "Triarchy Labs",
 				protocol: "x402 Arbitrage Mesh",
 				total_active: sortedAgents.filter((a) => a.status === "active").length,
 				agents: sortedAgents,

@@ -50,10 +50,10 @@ export default function CustomCursor({ theme = "dark" }: { theme?: "dark" | "lig
 				height: 30,
 				borderRadius: "50%",
 				backgroundColor: theme === "dark"
-					? (isHovering ? "rgba(0, 255, 65, 0.4)" : "rgba(255, 255, 255, 0.2)")
+					? (isHovering ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.2)")
 					: (isHovering ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)"),
 				border: isHovering
-					? (theme === "dark" ? "1px solid #00ff41" : "1px solid #000")
+					? (theme === "dark" ? "1px solid rgba(255,255,255,0.85)" : "1px solid #000")
 					: "none",
 				pointerEvents: "none",
 				zIndex: 99999,

@@ -49,11 +49,11 @@ export default function AgentDashboard() {
 		>
 			<h2
 				style={{
-					color: "#00ff41",
-					fontFamily: "monospace",
+					color: "rgba(255,255,255,0.85)",
+					fontFamily: "'Helvetica Now Display', 'Inter', sans-serif",
 					fontSize: "1.5rem",
 					letterSpacing: "0.2em",
-					borderBottom: "1px solid rgba(0,255,65,0.3)",
+					borderBottom: "1px solid rgba(255,255,255,0.3)",
 					paddingBottom: "1rem",
 				}}
 			>
@@ -73,11 +73,11 @@ export default function AgentDashboard() {
 						key={agent.id}
 						style={{
 							background: "rgba(0, 15, 0, 0.4)",
-							border: `1px solid ${agent.status === "active" ? "rgba(0, 255, 65, 0.4)" : agent.status === "quarantined" ? "rgba(255, 0, 60, 0.4)" : "rgba(100, 100, 100, 0.4)"}`,
+							border: `1px solid ${agent.status === "active" ? "rgba(255, 255, 255, 0.4)" : agent.status === "quarantined" ? "rgba(255, 0, 60, 0.4)" : "rgba(100, 100, 100, 0.4)"}`,
 							borderRadius: "4px",
 							padding: "1.5rem",
 							backdropFilter: "blur(10px)",
-							fontFamily: "monospace",
+							fontFamily: "'Helvetica Now Display', 'Inter', sans-serif",
 						}}
 					>
 						<div
@@ -101,14 +101,14 @@ export default function AgentDashboard() {
 								style={{
 									color:
 										agent.status === "active"
-											? "#00ff41"
+											? "rgba(255,255,255,0.85)"
 											: agent.status === "quarantined"
 												? "#ff003c"
 												: "#888",
 									textTransform: "uppercase",
 									fontSize: "0.8rem",
 									padding: "0.2rem 0.5rem",
-									border: `1px solid ${agent.status === "active" ? "#00ff41" : agent.status === "quarantined" ? "#ff003c" : "#888"}`,
+									border: `1px solid ${agent.status === "active" ? "rgba(255,255,255,0.85)" : agent.status === "quarantined" ? "#ff003c" : "#888"}`,
 								}}
 							>
 								{agent.status}
@@ -127,7 +127,7 @@ export default function AgentDashboard() {
 							style={{
 								display: "flex",
 								justifyContent: "space-between",
-								color: "#00ff41",
+								color: "rgba(255,255,255,0.85)",
 								fontSize: "0.9rem",
 							}}
 						>
@@ -138,7 +138,7 @@ export default function AgentDashboard() {
 					</div>
 				))}
 				{!data && (
-					<div style={{ color: "#888", fontFamily: "monospace" }}>
+					<div style={{ color: "#888", fontFamily: "'Helvetica Now Display', 'Inter', sans-serif" }}>
 						Scanning registry...
 					</div>
 				)}

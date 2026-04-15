@@ -33,7 +33,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 				flexDirection: "column",
 				alignItems: "center",
 				justifyContent: "center",
-				color: "#00ff41",
+				color: "rgba(255,255,255,0.85)",
 				fontFamily: "monospace",
 			}}
 		>
@@ -44,7 +44,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 				style={{ 
                     fontSize: "8vw", 
                     fontWeight: "bold", 
-                    textShadow: "0 0 40px #00ff41",
+                    textShadow: "0 0 40px rgba(255,255,255,0.85)",
                     letterSpacing: "-0.05em"
                 }}
 			>
@@ -58,7 +58,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 					marginTop: "2rem",
 					width: "300px",
 					height: "2px",
-					background: "rgba(0, 255, 65, 0.2)",
+					background: "rgba(255, 255, 255, 0.2)",
 					position: "relative",
 					overflow: "hidden"
 				}}
@@ -67,8 +67,8 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 					position: "absolute",
 					top: 0, left: 0, bottom: 0,
 					width: `${progress}%`,
-					background: "#00ff41",
-					boxShadow: "0 0 15px #00ff41",
+					background: "rgba(255,255,255,0.85)",
+					boxShadow: "0 0 15px rgba(255,255,255,0.85)",
                     transition: "width 0.1s linear"
 				}} />
 			</motion.div>
@@ -79,7 +79,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
                     marginTop: "1.5rem", 
                     letterSpacing: "0.2em", 
                     fontSize: "0.8rem", 
-                    color: "rgba(0, 255, 65, 0.6)" 
+                    color: "rgba(255, 255, 255, 0.6)" 
                 }}
             >
 				INITIALIZING L402 MESH PROTOCOL...

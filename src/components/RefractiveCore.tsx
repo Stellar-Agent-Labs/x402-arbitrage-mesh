@@ -30,7 +30,7 @@ export default function RefractiveCore() {
 				transmission={1.0}
 				roughness={0.05}
 				ior={1.6}
-				color="#00ff41"
+				color="rgba(255,255,255,0.85)"
 				resolution={1024}
 			/>
 		</Icosahedron>

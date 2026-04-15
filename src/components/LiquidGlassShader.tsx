@@ -88,7 +88,7 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	const [[positions, colors]] = useState(() => {
 		const pos = new Float32Array(PARTICLE_COUNT * 3);
 		const col = new Float32Array(PARTICLE_COUNT * 3);
-		const baseColor = new THREE.Color("#00ff41");
+		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -165,6 +165,30 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	);
 }
 
+// Эффект скачков напряжения для темной темы и стабильный свет для светлой
+function VoltageLights({ theme }: { theme: "dark" | "light" }) {
+	const dirLight = useRef<THREE.DirectionalLight>(null);
+	const ptLight = useRef<THREE.PointLight>(null);
+
+	useFrame(() => {
+		if (theme === "dark" && dirLight.current && ptLight.current) {
+			// Редкие, но сильные скачки напряжения
+			const isSurge = Math.random() > 0.96;
+			const voltage = isSurge ? Math.random() * 15 + 5 : Math.random() * 0.5 + 2;
+			dirLight.current.intensity = THREE.MathUtils.lerp(dirLight.current.intensity, voltage, 0.5);
+			ptLight.current.intensity = THREE.MathUtils.lerp(ptLight.current.intensity, voltage + 3, 0.5);
+		}
+	});
+
+	return (
+		<group>
+			<ambientLight intensity={0.5} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
+			<directionalLight ref={dirLight} position={[10, 10, 10]} intensity={theme === "dark" ? 3 : 1.5} color={theme === "dark" ? "#c8bfae" : "#aaaaaa"} />
+			<pointLight ref={ptLight} position={[-10, -10, -10]} intensity={theme === "dark" ? 5 : 2} color={theme === "dark" ? "#0fa33a" : "#cccccc"} />
+		</group>
+	);
+}
+
 export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	return (
 		<div
@@ -178,21 +202,11 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 		>
 			<Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
 				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
-
-				{/* Core Lighting for the Refractive Glass */}
-				<ambientLight intensity={0.5} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
 				
-                {theme === "dark" ? (
-                    <>
-                        <directionalLight position={[10, 10, 10]} intensity={3} color="#00ff41" />
-                        <pointLight position={[-10, -10, -10]} intensity={5} color="#0fa33a" />
-                    </>
-                ) : (
-                    <>
-                        <directionalLight position={[10, 10, 10]} intensity={1.5} color="#aaaaaa" />
-                        <pointLight position={[-10, -10, -10]} intensity={2} color="#cccccc" />
-                    </>
-                )}
+				{/* УДАЛЕНА HDRI КАРТА СТУДИИ: теперь круг преломляет только космос и свет, никаких софтбоксов */}
+
+				{/* Core Lighting & Voltage Surges */}
+				<VoltageLights theme={theme} />
 
 				<Stars
 					radius={100}

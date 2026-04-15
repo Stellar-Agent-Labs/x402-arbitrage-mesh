@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 const AGENTS = [
@@ -11,19 +11,115 @@ const AGENTS = [
 	{ id: "liquidity_sniper", task: "Flash Loans", rep: "91.4", earned: "$3,400.10", status: "ACTIVE" },
 ];
 
+const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
+const lusionTransition = "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
+
+function AgentCard({ agent, theme, index }: { agent: typeof AGENTS[0]; theme: "dark" | "light"; index: number }) {
+	const [hovered, setHovered] = useState(false);
+	const isQuarantined = agent.status === "QUARANTINED";
+	
+	const borderColor = isQuarantined 
+		? "#ff003c" 
+		: hovered 
+			? (theme === "dark" ? "rgba(0,255,65,0.5)" : "rgba(0,100,34,0.4)")
+			: (theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)");
+	const bgColor = hovered 
+		? (theme === "dark" ? "rgba(0,15,0,0.5)" : "rgba(240,255,245,0.7)")
+		: (theme === "dark" ? "rgba(20,20,28,0.4)" : "rgba(255,255,255,0.6)");
+	const statusColor = isQuarantined 
+		? "#ff003c" 
+		: hovered 
+			? (theme === "dark" ? "#00ff41" : "#006622")
+			: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
+
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: 50 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true }}
+			transition={{ delay: index * 0.1, duration: 0.5 }}
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
+			style={{
+				padding: "1.5rem",
+				background: bgColor,
+				border: `1px solid ${borderColor}`,
+				borderRadius: "8px",
+				backdropFilter: "blur(15px)",
+				display: "flex",
+				flexDirection: "column",
+				gap: "1rem",
+				cursor: "crosshair",
+				transition: lusionTransition,
+				boxShadow: hovered ? `0 0 20px ${theme === "dark" ? "rgba(0,255,65,0.15)" : "rgba(0,100,34,0.1)"}` : "none",
+				transform: hovered ? "scale(1.02)" : "scale(1)",
+			}}
+		>
+			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+				<span style={{ 
+					fontWeight: 500, 
+					fontSize: "1.1rem", 
+					letterSpacing: "0.03em",
+					color: hovered ? (theme === "dark" ? "#00ff41" : "#006622") : (theme === "dark" ? "#fff" : "#111"),
+					transition: lusionTransition,
+				}}>
+					{agent.id}
+				</span>
+				<span
+					style={{
+						padding: "2px 8px",
+						fontSize: "0.75rem",
+						border: `1px solid ${statusColor}`,
+						color: statusColor,
+						borderRadius: "4px",
+						fontFamily: "'SF Mono', monospace",
+						letterSpacing: "0.05em",
+						transition: lusionTransition,
+					}}
+				>
+					{agent.status}
+				</span>
+			</div>
+			<div style={{ 
+				color: theme === "dark" ? "#666" : "#888", 
+				fontSize: "0.85rem",
+				fontFamily: "'SF Mono', monospace",
+			}}>
+				[{agent.task}]
+			</div>
+			
+			<div style={{ 
+				display: "flex", 
+				justifyContent: "space-between", 
+				marginTop: "0.5rem", 
+				fontSize: "0.85rem", 
+				color: theme === "dark" ? "rgba(255,255,255,0.5)" : "#555",
+			}}>
+				<span>REP: {agent.rep}</span>
+				<span>USDC: {agent.earned}</span>
+			</div>
+		</motion.div>
+	);
+}
+
 export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	return (
 		<div
 			style={{
 				padding: "4rem 10vw",
-				background: theme === "dark" 
-					? "linear-gradient(to bottom, transparent, #010a02)" 
-					: "linear-gradient(to bottom, transparent, #f0f0f0)",
+				background: "transparent",
 				color: theme === "dark" ? "#fff" : "#111",
-				fontFamily: "monospace",
-				borderTop: `1px dashed ${theme === "dark" ? "rgba(0, 255, 65, 0.3)" : "rgba(0,0,0,0.1)"}`,
+				fontFamily: FONT_HEADING,
 			}}
 		>
+			{/* Subtle gradient divider */}
+			<div style={{
+				width: "40%",
+				margin: "0 auto 3rem",
+				height: "1px",
+				background: `linear-gradient(90deg, transparent, ${theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)"}, transparent)`,
+			}} />
+
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				whileInView={{ opacity: 1, y: 0 }}
@@ -36,11 +132,22 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 					marginBottom: "3rem",
 				}}
 			>
-				<h2 style={{ color: theme === "dark" ? "#00ff41" : "#111", fontSize: "2rem", letterSpacing: "0.2em", margin: 0 }}>
-					:: LIVE AGENT REGISTRY
+				<h2 style={{ 
+					color: theme === "dark" ? "rgba(255,255,255,0.9)" : "#111", 
+					fontSize: "1.8rem", 
+					letterSpacing: "0.15em", 
+					margin: 0,
+					fontWeight: 500,
+				}}>
+					LIVE AGENT REGISTRY
 				</h2>
-				<div style={{ fontSize: "1rem", color: theme === "dark" ? "#888" : "#555", letterSpacing: "0.1em" }}>
-					NETWORK_NODES: {AGENTS.length}
+				<div style={{ 
+					fontSize: "0.85rem", 
+					color: theme === "dark" ? "#555" : "#888", 
+					letterSpacing: "0.1em",
+					fontFamily: "'SF Mono', monospace",
+				}}>
+					NODES: {AGENTS.length}
 				</div>
 			</motion.div>
 
@@ -48,56 +155,12 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				style={{
 					display: "grid",
 					gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-					gap: "2rem",
-					paddingBottom: "5rem" // Space for bottom connector
+					gap: "1.5rem",
+					paddingBottom: "3rem"
 				}}
 			>
 				{AGENTS.map((agent, i) => (
-					<motion.div
-						key={agent.id}
-						initial={{ opacity: 0, y: 50 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ delay: i * 0.1, duration: 0.5 }}
-						whileHover={{
-							scale: 1.02,
-							boxShadow: theme === "dark" ? "0 0 20px rgba(0, 255, 65, 0.2)" : "0 0 20px rgba(0,0,0,0.1)",
-							borderColor: theme === "dark" ? "#00ff41" : "#000",
-						}}
-						style={{
-							padding: "1.5rem",
-							background: theme === "dark" ? "rgba(0, 20, 0, 0.4)" : "rgba(255, 255, 255, 0.6)",
-							border: `1px solid ${theme === "dark" ? "rgba(0, 255, 65, 0.1)" : "rgba(0, 0, 0, 0.1)"}`,
-							borderRadius: "4px",
-							backdropFilter: "blur(10px)",
-							display: "flex",
-							flexDirection: "column",
-							gap: "1rem",
-							cursor: "crosshair",
-							transition: "border-color 0.3s",
-						}}
-					>
-						<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-							<span style={{ fontWeight: "bold", fontSize: "1.2rem", letterSpacing: "0.05em" }}>{agent.id}</span>
-							<span
-								style={{
-									padding: "2px 8px",
-									fontSize: "0.8rem",
-									border: `1px solid ${agent.status === "QUARANTINED" ? "#ff003c" : (theme === "dark" ? "#00ff41" : "#111")}`,
-									color: agent.status === "QUARANTINED" ? "#ff003c" : (theme === "dark" ? "#00ff41" : "#111"),
-									borderRadius: "2px",
-								}}
-							>
-								{agent.status}
-							</span>
-						</div>
-						<div style={{ color: theme === "dark" ? "#888" : "#555", fontSize: "0.9rem" }}>[{agent.task}]</div>
-						
-						<div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem", fontSize: "0.9rem", color: theme === "dark" ? "#00ff41" : "#111" }}>
-							<span>REP: {agent.rep}</span>
-							<span>USDC: {agent.earned}</span>
-						</div>
-					</motion.div>
+					<AgentCard key={agent.id} agent={agent} theme={theme} index={i} />
 				))}
 			</div>
 		</div>

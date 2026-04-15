@@ -141,7 +141,7 @@ We use **WebAssembly (Extism WASI 0.2)**. Our cold starts are measured in *micro
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/Stellar-Agent-Labs/x402-arbitrage-mesh.git
+git clone https://github.com/Triarchy-Labs/x402-arbitrage-mesh.git
 cd x402-arbitrage-mesh
 cp .env.example .env.local
 npm install
@@ -217,7 +217,7 @@ The Mesh includes a **Farcaster Frame** entry point that implements ERC20 token 
 - Checks token balance via **Viem Multicall** (single RPC request)
 - Grants access to the Gateway for authorized holders
 
-Repository: [farcaster-token-gate](https://github.com/Stellar-Agent-Labs/farcaster-token-gate)
+Repository: [farcaster-token-gate](https://github.com/Triarchy-Labs/farcaster-token-gate)
 
 ---
 

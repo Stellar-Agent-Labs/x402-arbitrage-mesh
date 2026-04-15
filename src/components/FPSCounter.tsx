@@ -33,12 +33,12 @@ export default function FPSCounter() {
 				top: 40,
 				right: 40,
 				background: "rgba(0, 10, 0, 0.85)",
-				border: "1px solid #00ff41",
+				border: "1px solid rgba(255,255,255,0.85)",
 				padding: "10px 15px",
-				fontFamily: "monospace",
-				color: "#00ff41",
+				fontFamily: "'Helvetica Now Display', 'Inter', sans-serif",
+				color: "rgba(255,255,255,0.85)",
 				fontSize: 14,
-				boxShadow: "0 0 15px rgba(0, 255, 65, 0.3)",
+				boxShadow: "0 0 15px rgba(255, 255, 255, 0.3)",
 				zIndex: 100,
 			}}
 		>
