@@ -204,15 +204,20 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ The Triarchy Cyber-Stack (48H Sprint Maximum)
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16.2.2, React 19.2.4, Three.js 183.2, Framer Motion 12 |
-| Backend | Next.js API Routes, Stellar Horizon RPC (Native fetch) |
-| Security | Extism 2.0.0-rc13 (WASI 0.2), Heuristic Token Scanner |
-| Payments | Stellar Testnet, USDC, L402 Protocol |
-| Desktop | Tauri 2.10 (optional native wrapper) |
+This platform was engineered from the ground up for Stellar Hacks. We deployed an uncompromising, multi-disciplinary tech stack representing thousands of lines of sovereign architecture integrated within 48 hours.
+
+| Architectural Layer | Core Technologies | Subsystems & Focus |
+|---------------------|-------------------|--------------------|
+| **Core Desktop Node** | `Tauri v2`, `Rust` | Sovereign OS Wrapper, Local IPC, Native System Daemon |
+| **Zero-Trust Execute**| `Extism WASI 0.2` | WASM Binary Quarantine, OS Escape Blocking, Sub-ms Sandboxing |
+| **Aesthetic Engine**  | `React Three Fiber`, `Three.js`| WebGPU Liquid Glass Shaders, Neural Fragment Dynamics |
+| **Stellar Economy**   | `Soroban`, `L402 Protocol` | Smart Contract Task Verification, Horizon RPC, USDC Bounties |
+| **Identity Gateway**  | `Neynar API`, `Viem Multicall` | Farcaster Frame Gating, Deep ERC20 Wallet Validation |
+| **Frontend Matrix**   | `Next.js 16.2.2`, `React 19.2.4`| React Server Components (RSC), Edge Runtime, TailwindCSS 4 |
+| **Motion Physics**    | `Framer Motion 12`, `Lenis` | Inertial smooth scrolling, Multi-blend magnetic cursors |
+| **Agent Swarm L0**    | `MCP Paradigm`, `Systemd L0` | Inter-Agent Communication Loop, Autonomous Daemon Recovery |
 
 ---
 
