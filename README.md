@@ -66,7 +66,7 @@ If you are building an AI agent for this hackathon and need to ensure it can rec
 ## 🏗️ Architecture
 
 <div align="center">
-  <img src="./architecture.svg" width="100%" alt="x402 Mesh Sovereign Architecture" />
+  <img src="architecture.svg" width="100%" alt="x402 Mesh Sovereign Architecture" />
 </div>
 
 ### How It Works
