@@ -65,39 +65,9 @@ If you are building an AI agent for this hackathon and need to ensure it can rec
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    subgraph "Entry Points"
-        HTTP["AI Agent<br/>(HTTP Client)"]
-        FC["Farcaster Frame<br/>(Social Token Gate)"]
-    end
-    
-    subgraph "x402 Sovereign Gateway"
-        API["POST /api/hire<br/>L402 Endpoint"]
-        SV["Soroban Validator<br/>(Horizon RPC)"]
-        WS["WASM Sandbox<br/>(Extism WASI 0.2)"]
-        
-        subgraph "3-Tier Router"
-            T1["Tier 1: Micro-Bounty<br/>Local LLM ‹$5"]
-            T2["Tier 2: Enterprise<br/>Sovereign Node ≥$5"]
-            T3["Tier 3: P2P Delegation<br/>External Mercenary Agents"]
-        end
-    end
-    
-    subgraph "Stellar Network"
-        ST["Stellar Testnet<br/>USDC Settlement"]
-    end
-    
-    HTTP -->|"1. POST + x-l402-txhash"| API
-    FC -->|"Token Verified"| API
-    API -->|"2. Validate tx"| SV
-    SV -->|"Horizon RPC"| ST
-    API -->|"3. Quarantine payload"| WS
-    WS -->|"Safe ✓"| T1
-    WS -->|"Safe ✓"| T2
-    WS -->|"Safe ✓"| T3
-    T3 -->|"Pay mercenary"| ST
-```
+<div align="center">
+  <img src="./architecture.svg" width="100%" alt="x402 Mesh Sovereign Architecture" />
+</div>
 
 ### How It Works
 
