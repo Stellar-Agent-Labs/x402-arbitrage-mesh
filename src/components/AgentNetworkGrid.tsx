@@ -136,7 +136,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					{isMark53 && (
 						<div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
 							<button 
-                                onClick={() => window.open("https://github.com/Triarchy-Labs/x402-arbitrage-mesh", "_blank")}
+                                onClick={() => window.open("https://github.com/Triarchy-Labs/mark53-autonomous-node", "_blank")}
                                 style={{
 								padding: "8px 16px",
 								background: "transparent",
