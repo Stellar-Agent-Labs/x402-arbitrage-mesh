@@ -153,7 +153,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								[ OPENROUTER / LOCAL LLM CONFIG ]
 							</button>
 							<button 
-                                onClick={() => window.open("https://github.com/Triarchy-Labs/x402-arbitrage-mesh/tree/master/src-tauri", "_blank")}
+                                onClick={() => window.open("https://github.com/Triarchy-Labs/tauri-exosuit-gateway", "_blank")}
                                 style={{
 								padding: "8px 16px",
 								background: statusColor,
