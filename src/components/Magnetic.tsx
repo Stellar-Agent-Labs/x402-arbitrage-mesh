@@ -26,10 +26,13 @@ export default function Magnetic({ children, strength = 0.3, style, className }:
 			onMouseLeave={reset}
 			animate={{ x: position.x, y: position.y }}
 			transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-			style={{ display: "inline-block", ...style }}
+			style={{ display: "inline-block", position: "relative", ...style }}
 			className={className}
 		>
-			{children}
+			<div style={{ position: "absolute", top: -40, left: -40, right: -40, bottom: -40, zIndex: 1 }} />
+			<div style={{ position: "relative", zIndex: 2 }}>
+				{children}
+			</div>
 		</motion.div>
 	);
 }

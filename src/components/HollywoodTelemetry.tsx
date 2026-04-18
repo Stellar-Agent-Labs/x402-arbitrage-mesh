@@ -61,9 +61,7 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 	const borderColor = hovered 
 		? (theme === "dark" ? "rgba(0,255,65,0.4)" : "rgba(0,100,34,0.3)")
 		: (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)");
-	const bgColor = hovered
-		? (theme === "dark" ? "rgba(0,15,0,0.6)" : "rgba(240,255,245,0.8)")
-		: (theme === "dark" ? "rgba(20,20,28,0.75)" : "rgba(255,255,255,0.85)");
+	// bgColor removed — Peachworlds glass uses inline values
 	const textColor = hovered
 		? (theme === "dark" ? "#00ff41" : "#006622")
 		: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
@@ -84,16 +82,19 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 				left: 40,
 				width: 400,
 				height: 220,
-				background: bgColor,
+				background: hovered 
+					? (theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(240,255,245,0.6)")
+					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.45)"),
 				border: `1px solid ${borderColor}`,
-				borderRadius: 8,
+				borderRadius: 12,
 				padding: 15,
 				fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
 				color: textColor,
 				fontSize: 10,
 				overflow: "hidden",
 				boxShadow: glowShadow,
-				backdropFilter: "blur(20px)",
+				backdropFilter: hovered ? "blur(24px) saturate(1.4)" : "blur(24px) saturate(1.2)",
+				WebkitBackdropFilter: hovered ? "blur(24px) saturate(1.4)" : "blur(24px) saturate(1.2)",
 				zIndex: 20,
 				transition: lusionTransition,
 			}}
