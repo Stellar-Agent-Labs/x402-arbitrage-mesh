@@ -42,8 +42,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 			: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
 
 	if (isMark53) {
-		borderColor = "transparent"; // Handled by rare-snake-border pseudo-element if needed, or we just leave it gold.
-		statusColor = theme === "dark" ? "#ffd700" : "#ccaa00"; // Golden Template Color
+		borderColor = "transparent"; // Handled by rare-snake-border pseudo-element
 	}
 
 	return (
@@ -137,7 +136,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					{isMark53 && (
 						<div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
 							<button 
-                                onClick={() => window.location.href = "/dashboard"}
+                                onClick={() => window.open("https://github.com/Triarchy-Labs/x402-arbitrage-mesh", "_blank")}
                                 style={{
 								padding: "8px 16px",
 								background: "transparent",
@@ -154,7 +153,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								[ OPENROUTER / LOCAL LLM CONFIG ]
 							</button>
 							<button 
-                                onClick={() => { alert('Mark 53 Tauri Exosuit Compilation In Progress... Booting Web Dashboard Fallback.'); window.location.href = "/dashboard"; }}
+                                onClick={() => window.open("https://github.com/Triarchy-Labs/x402-arbitrage-mesh/tree/master/src-tauri", "_blank")}
                                 style={{
 								padding: "8px 16px",
 								background: statusColor,
@@ -169,7 +168,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								transition: lusionTransition,
 								opacity: hovered ? 1 : 0.8
 							}}>
-								[ DOWNLOAD TAURI EXOSUIT ]
+								[ VIEW TAURI EXOSUIT BASE ]
 							</button>
 						</div>
 					)}
@@ -189,7 +188,7 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				if (res.ok) {
 					const data = await res.json();
 					if (data.agents && data.agents.length > 0) {
-						const mapped: AgentDisplay[] = data.agents.map((a: any) => ({
+						let mapped: AgentDisplay[] = data.agents.map((a: any) => ({
 							id: a.id,
 							task: a.capabilities?.[0] || "General",
 							rep: a.reputationScore?.toFixed(1) || "0.0",
@@ -199,8 +198,16 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 						// Always append Mark 53 golden template
 						const hasMark53 = mapped.some(a => a.id === "mark_53_sarcophagus");
 						if (!hasMark53) {
-							mapped.push(FALLBACK_AGENTS[FALLBACK_AGENTS.length - 1]);
+							mapped.push(FALLBACK_AGENTS.find(a => a.id === "mark_53_sarcophagus") || FALLBACK_AGENTS[6]);
 						}
+                        
+                        // Refill to 7 nodes so visual masonry grid is preserved
+                        for (const fb of FALLBACK_AGENTS) {
+                            if (mapped.length >= 7) break;
+                            if (!mapped.find(a => a.id === fb.id)) {
+                                mapped.push(fb);
+                            }
+                        }
 						setAgents(mapped);
 					}
 				}
