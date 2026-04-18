@@ -129,7 +129,7 @@ export function Nav() {
 
 			<div style={{ pointerEvents: "auto", display: "flex", gap: "24px", alignItems: "center", position: "relative" }}>
 				<button
-					onClick={() => window.location.href = "/bounties"}
+					onClick={() => window.location.href = "/dashboard"}
 					style={{
 						background: "transparent",
 						color: "rgba(255,255,255,0.5)",
@@ -143,28 +143,16 @@ export function Nav() {
 						letterSpacing: "0.1em",
 						transition: "all 0.2s ease"
 					}}
-					onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
-					onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
-				>
-					[ BOUNTIES ]
-				</button>
-				<button
-					onClick={() => window.location.href = "/dashboard"}
-					style={{
-						background: "transparent",
-						color: "#00ff41",
-						border: "1px solid rgba(0, 255, 65, 0.4)",
-						padding: "8px 24px",
-						borderRadius: "40px",
-						cursor: "pointer",
-						fontFamily: '"Space Mono", monospace',
-						fontSize: "0.8rem",
-						fontWeight: "bold",
-						letterSpacing: "0.1em",
-						transition: "all 0.2s ease"
+					onMouseEnter={(e) => { 
+						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.1)";
+						e.currentTarget.style.color = "#00ff41";
+						e.currentTarget.style.borderColor = "rgba(0, 255, 65, 0.4)";
 					}}
-					onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.1)"}
-					onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+					onMouseLeave={(e) => { 
+						e.currentTarget.style.backgroundColor = "transparent";
+						e.currentTarget.style.color = "rgba(255,255,255,0.5)";
+						e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+					}}
 				>
 					[ DASHBOARD ]
 				</button>
