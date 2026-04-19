@@ -357,6 +357,14 @@ export default function Dashboard() {
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onFocus={() => setAgentState("typing")}
                                 onBlur={() => agentState === "typing" && setAgentState("idle")}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        if (inputValue.trim() && agentState !== "working") {
+                                            handleExecute();
+                                        }
+                                    }
+                                }}
                             />
 
                             <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
