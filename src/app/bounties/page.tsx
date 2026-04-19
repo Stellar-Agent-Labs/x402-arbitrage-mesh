@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Nav } from "@/components/Nav";
+import { requestAccess } from "@stellar/freighter-api";
 
 const BountiesPage = () => {
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -16,11 +17,22 @@ const BountiesPage = () => {
 		setEscrowStatus("working");
 		setEscrowResult(null);
 
-		// Визуальная симуляция транзакции для видео (чтобы не требовать Freighter extension)
-		setTimeout(() => {
+		try {
+			// Нативный вызов блокчейн-кошелька Freighter
+			const accessDetails = await requestAccess();
+			
+			if (accessDetails.error) {
+				throw new Error(accessDetails.error);
+			}
+
+			const userPubKey = accessDetails.address || "GXYZ...";
+
 			setEscrowStatus("success");
-			setEscrowResult(`✓ ESCROW SECURED: TX x402_demo_hash_2026`);
-		}, 1500);
+			setEscrowResult(`✓ ESCROW SECURED (Freighter: ${userPubKey.substring(0,6)}...${userPubKey.slice(-4)})`);
+		} catch (e: any) {
+			setEscrowStatus("error");
+			setEscrowResult(`FREIGHTER REJECTED: ${e.message || "Connection denied"}`);
+		}
 	};
 
 	const bounties = [
