@@ -69,7 +69,7 @@ export function GlitchWormProgress({ progress }: GlitchWormProps) {
                                             <motion.div 
                                                 className="absolute inset-0 bg-white"
                                                 animate={{ opacity: [1, 0, 1] }}
-                                                transition={{ duration: 0.3, repeat: Infinity }}
+                                                transition={{ duration: 1.0, repeat: Infinity }}
                                             />
                                         )}
                                         {/* Tail Pulse */}
