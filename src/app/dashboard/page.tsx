@@ -127,31 +127,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (agentState === "working") {
             const int = setInterval(() => {
-                setProgress(p => {
-                    if (p >= 100) {
-                        clearInterval(int);
-                        setAgentState("success");
-                        // --- DEMO SUCCESS OVERRIDE LOGIC ---
-                        if (inputValue.toLowerCase().includes("demo") || inputValue.toLowerCase().includes("bounty") || inputValue.toLowerCase().includes("x402")) {
-                            setBalance(b => b + 500);
-                            setLastResult({
-                                status: "completed",
-                                executor: "0x892a...3B9A",
-                                result: "0x98f7c8b2... [Proof Verified]. Bounty executed with 0-Trust anomaly. 500 USDC dispensed."
-                            });
-                            // Play retro coin sound
-                            try {
-                                const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/bling_bonus.ogg");
-                                audio.volume = 0.4;
-                                audio.play();
-                            } catch (e) {}
-                        }
-                        // -----------------------------------
-                        return 100;
-                    }
-                    // Speed variable, faster at the end
-                    return p + (Math.random() * 4);
-                });
+                setProgress(p => p + (Math.random() * 4));
             }, 200);
             return () => clearInterval(int);
         } else if (agentState === "idle" || agentState === "thinking" || agentState === "exhausted") {
@@ -159,7 +135,30 @@ export default function Dashboard() {
         } else if (agentState === "success") {
             setProgress(100);
         }
-    }, [agentState, inputValue]);
+    }, [agentState]);
+
+    // Handle 100% completion side-effects safely outside the state updater
+    useEffect(() => {
+        if (agentState === "working" && progress >= 100) {
+            setAgentState("success");
+            // --- DEMO SUCCESS OVERRIDE LOGIC ---
+            if (inputValue.toLowerCase().includes("demo") || inputValue.toLowerCase().includes("bounty") || inputValue.toLowerCase().includes("x402")) {
+                setBalance(b => b + 500);
+                setLastResult({
+                    status: "completed",
+                    executor: "0x892a...3B9A",
+                    result: "0x98f7c8b2... [Proof Verified]. Bounty executed with 0-Trust anomaly. 500 USDC dispensed."
+                });
+                // Play retro coin sound
+                try {
+                    const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/bling_bonus.ogg");
+                    audio.volume = 0.4;
+                    audio.play();
+                } catch (e) {}
+            }
+            // -----------------------------------
+        }
+    }, [progress, agentState, inputValue]);
 
 	return (
 		<main className="min-h-screen bg-[#050505] text-[#ededed] font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-24 pb-8 overflow-hidden">
