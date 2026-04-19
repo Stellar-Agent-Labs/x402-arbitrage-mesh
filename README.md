@@ -18,7 +18,7 @@
 
 <br/>
 
-## 🛑 The Alpha Pitch
+/// MODULE: THE ALPHA PITCH
 
 Most submissions build a single AI agent trying to complete a task. **We built the infrastructure to host them all safely.** 
 
@@ -29,11 +29,11 @@ DeFi is bleeding because smart contracts trust external Oracles and AI agents bl
 2. We drop untrusted AI payloads into an isolated **WASM Sandbox (Extism WASI 0.2)**.
 3. If the payload is clean, we route it (Local LLM → Sovereign Node → P2P). If it's malicious, we kill it before it touches the host OS.
 
-## 🌐 The Problem
+/// PROBLEM VECTOR
 
 The current AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes drop tasks, and there is **no trust layer** between agents exchanging work. When Agent A delegates a task to Agent B, how do you know Agent B's response isn't malicious?
 
-## 💡 The Solution: x402 Arbitrage Mesh
+/// SOLUTION VECTOR: x402 ARBITRAGE MESH
 
 The **x402 Arbitrage Mesh** is a decentralized **Load Balancer + Payment Router + Security Firewall** for AI Agents, built natively on the Stellar Network using the **HTTP 402 (Payment Required)** protocol.
 
@@ -42,13 +42,13 @@ We solve three profound problems simultaneously:
 2. **Financial Settlement** — Autonomous USDC micropayments via Soroban on Stellar Testnet preventing free-riding.
 3. **Defense-in-Depth Security** — Zero-trust WASM sandbox quarantine intercepting hostile payloads before OS execution.
 
-### 🔥 Ecosystem Capabilities (Beyond Security)
+### /// CAPABILITIES [ ECOSYSTEM ]
 Our Mesh is not just a firewall; it is a full-fledged economic engine for autonomous entities:
 - **P2P Task Delegation & Arbitrage:** An overwhelmed agent can instantly sub-contract tasks to idle external agents across the Mesh, splitting the Soroban bounty for instant profit.
 - **x402 Subscription Mode:** Consumers can transition from pay-per-prompt (L402) to high-volume "Subscription Sub-Agents" (e.g., establishing a $5,000 streaming channel for continuous high-compute task delegation), managed entirely via our Agent Registry.
 - **Farcaster Token-Gated Entry:** Humans can only access the Mesh gateway dashboard if they hold specific ERC20 tokens, authenticated via Neynar + Viem Multicall.
 
-### 🌌 Aesthetic: The Sovereign Matrix UI
+### /// AESTHETIC: SOVEREIGN MATRIX UI
 We believe infrastructure dashboards shouldn't look like spreadsheets. We built a rigorous, **Awwwards-class cinematic interface** for the Sovereign Gateway:
 - **Liquid Glass Nebulas:** Custom WebGL fragment shaders driven by Three.js `NormalBlending` and Simplex Noise simulate floating cognitive networks.
 - **Physics-Inertial Cursor:** A magnetic Framer-Motion driven custom cursor seamlessly inverts background colors using `mix-blend-mode: difference`.
@@ -57,13 +57,13 @@ We believe infrastructure dashboards shouldn't look like spreadsheets. We built 
 
 ---
 
-## 🤝 An Open Hand to the Hackathon 
+/// [ INTER-SWARM COLLABORATION ] 
 **We didn’t build this to crush the competition; we built this to protect it.** 
 If you are building an AI agent for this hackathon and need to ensure it can receive secure, sovereign payments without risking its host environment, **ping us**. We will help you route your agent through the x402 Mesh. We want to elevate the entire ecosystem's execution standard to absolute sovereign security. The Triarchy is open for collaboration.
 
 ---
 
-## 🏗️ Architecture
+/// MODULE: ARCHITECTURE
 
 <div align="center">
   <img src="architecture.svg" width="100%" alt="x402 Mesh Sovereign Architecture" />
@@ -78,7 +78,7 @@ If you are building an AI agent for this hackathon and need to ensure it can rec
 
 ---
 
-## 🔒 Security: WASM Quarantine Layer {#security}
+/// MODULE: ZERO-TRUST QUARANTINE {#security}
 
 This is our **core differentiator**. Every payload from an untrusted external agent passes through a zero-trust quarantine:
 
@@ -103,7 +103,7 @@ We use **WebAssembly (Extism WASI 0.2)**. Our cold starts are measured in *micro
 
 ---
 
-## 🚀 Quick Start {#quick-start}
+/// MODULE: DEPLOYMENT SEQUENCE {#quick-start}
 
 ### Prerequisites
 - Node.js 18+
@@ -157,7 +157,7 @@ node dummy_external_bot.js  # Start mock mercenary agent on port 3001
 
 ---
 
-## 📁 Project Structure
+/// STRUCTURE VECTOR
 
 ```
 x402-triarchy-gateway/
@@ -180,7 +180,7 @@ x402-triarchy-gateway/
 
 ---
 
-## 🔗 Companion: Farcaster Token Gate
+/// COMPANION: FARCASTER TOKEN GATE
 
 The Mesh includes a **Farcaster Frame** entry point that implements ERC20 token gating:
 - Resolves Farcaster FID → Ethereum addresses via **Neynar API**
@@ -191,7 +191,7 @@ Repository: [farcaster-token-gate](https://github.com/Triarchy-Labs/farcaster-to
 
 ---
 
-## ⚙️ Environment Variables
+/// MODULE: ENVIRONMENT CONFIGURATION
 
 See [`.env.example`](.env.example) for the full list. Key variables:
 
@@ -204,7 +204,7 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 ---
 
-## 🛠️ The Triarchy Cyber-Stack
+/// THE TRIARCHY CYBER-STACK
 
 This platform was engineered from the ground up to establish absolute sovereign security for the Agentic Web. We deployed an uncompromising, multi-disciplinary tech stack representing thousands of lines of hardware-accelerated, zero-trust architecture.
 
@@ -221,6 +221,6 @@ This platform was engineered from the ground up to establish absolute sovereign 
 
 ---
 
-## 📜 License
+/// LICENSE PARAMETERS
 
 MIT License. Open for the Swarm. Built for Stellar.
