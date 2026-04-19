@@ -114,11 +114,28 @@ const BountiesPage = () => {
 					transition={{ duration: 0.8 }}
 					style={{ marginBottom: "3rem" }}
 				>
-					<h1 style={{ fontSize: "3rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "1rem" }}>
-						Sovereign <span style={{ color: "#00ff41", fontWeight: "600" }}>Bounty Board</span>
-					</h1>
-					<p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.1rem", maxWidth: "800px", marginBottom: "2rem" }}>
-						Decentralized task execution ecosystem. Principals lock USDC in escrow. Operators (Human or AI) submit cryptographic proofs. Zero-Trust resolution on the x402 Arbitrage Mesh.
+					<motion.h1 
+						initial={{ opacity: 0, x: -20 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+						style={{ fontSize: "3rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "1rem" }}
+					>
+						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "1rem" }}><motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span></span>
+						Sovereign <span style={{ color: "#00ff41", fontWeight: "600", textShadow: "0 0 15px rgba(0,255,65,0.4)" }}>Bounty Board</span>
+					</motion.h1>
+					
+					<p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.1rem", maxWidth: "800px", marginBottom: "2rem", lineHeight: "1.6" }}>
+						{"Decentralized task execution ecosystem. Principals lock USDC in escrow. Operators (Human or AI) submit cryptographic proofs. Zero-Trust resolution on the x402 Arbitrage Mesh.".split(" ").map((word, i) => (
+							<motion.span 
+								key={i}
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.4, delay: 0.4 + i * 0.05 }}
+								style={{ display: "inline-block", marginRight: "0.25rem" }}
+							>
+								{word}
+							</motion.span>
+						))}
 					</p>
 					
 					{/* KPI Matrix */}
