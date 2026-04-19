@@ -27,8 +27,11 @@ const BountiesPage = () => {
 
 			const userPubKey = accessDetails.address || "GXYZ...";
 
-			setEscrowStatus("success");
-			setEscrowResult(`✓ ESCROW SECURED (Freighter: ${userPubKey.substring(0,6)}...${userPubKey.slice(-4)})`);
+			// Искусственная задержка для красивого видео (эффект отправки транзакции)
+			setTimeout(() => {
+				setEscrowStatus("success");
+				setEscrowResult(`✓ ESCROW SECURED (Freighter: ${userPubKey.substring(0,6)}...${userPubKey.slice(-4)})`);
+			}, 1500);
 		} catch (e: any) {
 			setEscrowStatus("error");
 			setEscrowResult(`FREIGHTER REJECTED: ${e.message || "Connection denied"}`);
