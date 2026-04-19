@@ -15,32 +15,12 @@ const BountiesPage = () => {
 		if (!directive.trim()) return;
 		setEscrowStatus("working");
 		setEscrowResult(null);
-		try {
-			const res = await fetch("/api/hire", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"x-l402-txhash": "x402_demo_hash_2026",
-				},
-				body: JSON.stringify({
-					description: directive,
-					bounty_usdc: parseFloat(reward) || 1.0,
-					client_id: "bounty_board_ui",
-					task_id: `bounty_${Date.now()}`,
-				}),
-			});
-			const data = await res.json();
-			if (data.status === "completed" || data.status === "delegated" || data.status === "accepted") {
-				setEscrowStatus("success");
-				setEscrowResult(`✓ ${data.status.toUpperCase()} — ${data.executor || "agent"}`);
-			} else {
-				setEscrowStatus("error");
-				setEscrowResult(data.error || data.status);
-			}
-		} catch (e: any) {
-			setEscrowStatus("error");
-			setEscrowResult(e.message);
-		}
+
+		// Визуальная симуляция транзакции для видео (чтобы не требовать Freighter extension)
+		setTimeout(() => {
+			setEscrowStatus("success");
+			setEscrowResult(`✓ ESCROW SECURED: TX x402_demo_hash_2026`);
+		}, 1500);
 	};
 
 	const bounties = [
@@ -144,6 +124,10 @@ const BountiesPage = () => {
 								transition={{ duration: 0.5, delay: i * 0.1 }}
 								onHoverStart={() => setHoverIndex(i)}
 								onHoverEnd={() => setHoverIndex(null)}
+								onClick={() => {
+									setDirective(`Execute ${bounty.title} under Triarchy protocol guidelines.\nRequire: ${bounty.skills.join(', ')} expertise.\nPriority: ${bounty.difficulty}`);
+									setReward(bounty.bounty.split(' ')[0].replace(/,/g, ''));
+								}}
 								style={{
 									display: "grid",
 									gridTemplateColumns: "1fr 3fr 1.5fr 1fr",
