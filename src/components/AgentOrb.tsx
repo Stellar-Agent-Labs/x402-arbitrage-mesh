@@ -68,7 +68,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
             rotateY: 0,
 			transition: { duration: 4, repeat: Infinity, ease: "easeInOut" as const }
 		},
-		working: { x: [-2, 2, -2, 2, 0], y: [-1, 1, -1, 1, 0], rotateY: 0, transition: { duration: 0.5, repeat: Infinity, ease: "easeInOut" as const } },
+		working: { x: 0, y: [-1, 1, -1], rotateY: 0, transition: { duration: 1.8, repeat: Infinity, ease: "easeInOut" as const } },
 		typing: { x: 0, y: -5, rotateY: 180, transition: { duration: 0.6, ease: "circOut" as const } }, // Turning back to type!
 		sneaky: { x: 18, y: 4, scale: 0.95, rotateY: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 		success: { x: 0, y: [0, -15, 0], rotateY: 0, transition: { duration: 1.2, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" as const } },
