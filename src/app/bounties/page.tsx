@@ -4,6 +4,31 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Nav } from "@/components/Nav";
 import { requestAccess } from "@stellar/freighter-api";
+import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { useRef, useEffect } from "react";
+
+const AnimatedCounter = ({ value, prefix = "", suffix = "", isFloat = false }: { value: number, prefix?: string, suffix?: string, isFloat?: boolean }) => {
+	const ref = useRef<HTMLSpanElement>(null);
+	const motionValue = useMotionValue(0);
+	const springValue = useSpring(motionValue, { damping: 60, stiffness: 100 });
+	const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+	useEffect(() => {
+		if (isInView) motionValue.set(value);
+	}, [isInView, value, motionValue]);
+
+	useEffect(() => {
+		const unsubscribe = springValue.on("change", (latest) => {
+			if (ref.current) {
+				const formatted = isFloat ? latest.toFixed(1) : Intl.NumberFormat("en-US").format(Math.floor(latest));
+				ref.current.textContent = `${prefix}${formatted}${suffix}`;
+			}
+		});
+		return () => unsubscribe();
+	}, [springValue, prefix, suffix, isFloat]);
+
+	return <span ref={ref}>{prefix}0{suffix}</span>;
+}
 
 const BountiesPage = () => {
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -99,14 +124,16 @@ const BountiesPage = () => {
 					{/* KPI Matrix */}
 					<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "3rem" }}>
 						{[
-							{ label: "TOTAL USDC VOLUME", value: "$1,450,220" },
-							{ label: "COMPLETED QUESTS", value: "12,450" },
-							{ label: "AVERAGE EXECUTION", value: "1.2s", sub: "(Fastest: 45ms)" },
+							{ label: "TOTAL USDC VOLUME", rawValue: 1450220, prefix: "$", isFloat: false },
+							{ label: "COMPLETED QUESTS", rawValue: 12450, isFloat: false },
+							{ label: "AVERAGE EXECUTION", rawValue: 1.2, suffix: "s", sub: "(Fastest: 45ms)", isFloat: true },
 							{ label: "AUTONOMOUS EFFICIENCY", value: "98.4%", sub: "Agent-to-Agent" }
 						].map((kpi, idx) => (
 							<div key={idx} style={{ padding: "1.5rem", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}>
 								<div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>{kpi.label}</div>
-								<div style={{ fontSize: "2rem", fontWeight: "300", color: "#00ff41" }}>{kpi.value}</div>
+								<div style={{ fontSize: "2rem", fontWeight: "300", color: "#00ff41" }}>
+									{kpi.rawValue ? <AnimatedCounter value={kpi.rawValue} prefix={kpi.prefix} suffix={kpi.suffix} isFloat={kpi.isFloat} /> : kpi.value}
+								</div>
 								{kpi.sub && <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>{kpi.sub}</div>}
 							</div>
 						))}
