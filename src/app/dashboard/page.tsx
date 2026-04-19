@@ -1,10 +1,33 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from "framer-motion";
 import { Nav } from "@/components/Nav";
 import { AgentOrb, AgentState } from "@/components/AgentOrb";
 import { GlitchWormProgress } from "@/components/GlitchWormProgress";
+
+const AnimatedCounter = ({ value, prefix = "", suffix = "", isFloat = false }: { value: number, prefix?: string, suffix?: string, isFloat?: boolean }) => {
+	const ref = useRef<HTMLSpanElement>(null);
+	const motionValue = useMotionValue(0);
+	const springValue = useSpring(motionValue, { damping: 60, stiffness: 100 });
+	const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+	useEffect(() => {
+		if (isInView) motionValue.set(value);
+	}, [isInView, value, motionValue]);
+
+	useEffect(() => {
+		const unsubscribe = springValue.on("change", (latest) => {
+			if (ref.current) {
+				const formatted = isFloat ? latest.toFixed(1) : latest.toFixed(0).padStart(2, '0');
+				ref.current.textContent = `${prefix}${formatted}${suffix}`;
+			}
+		});
+		return () => unsubscribe();
+	}, [springValue, prefix, suffix, isFloat]);
+
+	return <span ref={ref}>{prefix}00{suffix}</span>;
+}
 
 export default function Dashboard() {
 	const [agentState, setAgentState] = useState<AgentState>("idle");
@@ -119,10 +142,47 @@ export default function Dashboard() {
 		<main className="min-h-screen bg-[#050505] text-[#ededed] font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-24 pb-8 overflow-hidden">
 			<Nav />
 			
-			<div className="w-full flex-1 flex flex-col w-full mx-auto px-4 lg:px-8 mt-4 gap-8">
+			<div className="w-full flex-1 flex flex-col mx-auto px-4 lg:px-8 mt-4 gap-8">
 				
+				{/* HEADER */}
+				<motion.div
+					initial="hidden"
+					animate="visible"
+					variants={{
+						hidden: { opacity: 0 },
+						visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+					}}
+					className="relative"
+				>
+					<motion.h1 
+						variants={{
+							hidden: { opacity: 0, x: -20 },
+							visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+						}}
+						className="text-4xl md:text-4xl font-light mb-4 tracking-tight text-gray-300"
+					>
+						<span className="text-gray-500 mr-4"><motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span></span>
+						Sovereign <span className="text-[#00ff41] font-bold tracking-tight shadow-[#00ff41]/20 drop-shadow-[0_0_15px_rgba(0,255,65,0.4)]">Dashboard</span>
+					</motion.h1>
+					
+					<p className="text-gray-400 max-w-2xl text-sm leading-relaxed tracking-wide">
+						{"Real-time telemetric observation of the x402 AI Swarm. Autonomous execution state, node latency, and infrastructure health metrics.".split(" ").map((word, i) => (
+							<motion.span 
+								key={i}
+								variants={{
+									hidden: { opacity: 0, y: 10 },
+									visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+								}}
+								className="inline-block mr-1"
+							>
+								{word}
+							</motion.span>
+						))}
+					</p>
+				</motion.div>
+
 				{/* 1. TOP: The Sentient Stage (Maximized Widescreen Space) */}
-				<section ref={stageRef} className="relative w-full h-[500px] flex items-center justify-between z-10 overflow-hidden rounded-3xl border border-white/5 bg-black/50 shadow-2xl mt-2">
+				<section ref={stageRef} className="relative w-full h-[500px] flex items-center justify-between z-10 overflow-hidden rounded-3xl border border-white/5 bg-black/50 shadow-2xl">
                     
                     {/* Background Depth FX & Deep Perspective Grid */}
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,255,65,0.02)_0%,_transparent_70%)] pointer-events-none z-0" />
@@ -166,7 +226,7 @@ export default function Dashboard() {
                         <div className="w-[1px] h-3 bg-white/10" />
                         <div className="flex items-center gap-2">
                             <span className="text-[8px] text-white/40 uppercase tracking-widest">LVL</span>
-                            <span className="text-[10px] text-[#00ff41]">03</span>
+                            <span className="text-[10px] text-[#00ff41]"><AnimatedCounter value={99} /></span>
                         </div>
                     </div>
 
