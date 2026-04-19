@@ -59,24 +59,19 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 		return () => window.removeEventListener("mousemove", handleMouseMove);
 	}, [state]);
 
-	// Container physics (now with rotateY for turning back!)
+	// Container physics
 	const containerVariants = {
-		idle: { x: 0, y: 0, scale: 1, rotate: 0, rotateY: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
-		thinking: { 
-			x: [0, -15, -15, 15, 15, 0], 
-			y: [0, -8, -8, -8, -8, 0],
-            rotateY: 0,
-			transition: { duration: 4, repeat: Infinity, ease: "easeInOut" as const }
-		},
-		working: { x: 0, y: [-1, 1, -1], rotateY: 0, transition: { duration: 1.8, repeat: Infinity, ease: "easeInOut" as const } },
-		typing: { x: 0, y: -5, rotateY: 180, transition: { duration: 0.6, ease: "circOut" as const } }, // Turning back to type!
-		sneaky: { x: 18, y: 4, scale: 0.95, rotateY: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
-		success: { x: 0, y: [0, -15, 0], rotateY: 0, transition: { duration: 1.2, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" as const } },
-		error: { x: [-6, 6, -6, 6, 0], y: 0, rotateY: 0, transition: { duration: 0.8, repeat: Infinity, ease: "easeInOut" as const } },
-		sad: { x: 0, y: 8, rotateY: 0, transition: { duration: 1.5, ease: "easeOut" as const } },
-		exhausted: { x: 0, y: 12, scale: 0.95, rotateY: 0, transition: { duration: 2.5, ease: "easeOut" as const } },
-		surrender: { x: 0, y: 0, rotateY: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
-		danger: { x: [-4, 4, -4, 4, 0], y: 0, rotateY: 0, transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" as const } }
+		idle:      { x: 0, y: 0, scale: 1, rotate: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+		thinking:  { x: [0, -15, -15, 15, 15, 0], y: [0, -8, -8, -8, -8, 0], transition: { duration: 4, repeat: Infinity, ease: "easeInOut" as const } },
+		working:   { x: 0, y: [-1, 1, -1], transition: { duration: 1.8, repeat: Infinity, ease: "easeInOut" as const } },
+		typing:    { x: 0, y: 0, scale: 0.8, transition: { duration: 0.3, ease: "easeOut" as const } },
+		sneaky:    { x: 18, y: 4, scale: 0.95, transition: { duration: 0.6, ease: "easeOut" as const } },
+		success:   { x: 0, y: [0, -15, 0], transition: { duration: 1.2, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" as const } },
+		error:     { x: [-6, 6, -6, 6, 0], y: 0, transition: { duration: 0.8, repeat: Infinity, ease: "easeInOut" as const } },
+		sad:       { x: 0, y: 8, transition: { duration: 1.5, ease: "easeOut" as const } },
+		exhausted: { x: 0, y: 12, scale: 0.95, transition: { duration: 2.5, ease: "easeOut" as const } },
+		surrender: { x: 0, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
+		danger:    { x: [-4, 4, -4, 4, 0], y: 0, transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" as const } }
 	};
 
 	// Pure White Eye shapes without black UI masks
