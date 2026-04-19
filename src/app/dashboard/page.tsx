@@ -189,7 +189,7 @@ export default function Dashboard() {
 					</motion.h1>
 					
 					<p className="text-gray-400 max-w-2xl text-sm leading-relaxed tracking-wide">
-						{"Real-time telemetric observation of the x402 AI Swarm. Autonomous execution state, node latency, and infrastructure health metrics.".split(" ").map((word, i) => (
+						{"The Sovereign Command Matrix. Real-time cognitive surveillance of the Triarchy Swarm, mapping L1 autonomous task execution, zero-trust cryptographic resolution, and live node vitality across the x402 network.".split(" ").map((word, i) => (
 							<motion.span 
 								key={i}
 								variants={{
