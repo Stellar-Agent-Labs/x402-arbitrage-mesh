@@ -228,18 +228,36 @@ This platform was engineered from the ground up to establish absolute sovereign 
 
 /// MODULE: VERIFICATION STACK
 
-Every commit passes through our 8-instrument automated verification pipeline:
+Every commit passes through our 14-instrument automated verification pipeline, organized in three tiers:
 
-| # | Instrument | Type | What It Checks |
-|---|-----------|------|---------|
-| 1 | `tsc --noEmit` | Static Analysis | TypeScript strict-mode type safety |
-| 2 | `eslint src/` | Linting | React hooks rules, unused vars, immutability |
-| 3 | `next build` | Production Build | SSR/SSG page generation, bundle integrity |
-| 4 | `triarchy-sentinel` | Blast Radius | Cross-file import graph impact analysis |
-| 5 | `vision-guardian` | File Watcher Audit | YAML frontmatter, broken cross-refs, stealth edits |
-| 6 | `dungeon-forge audit` | Structural Integrity | ID collisions, orphan dungeons, stub detection |
-| 7 | `system-health` | Runtime Monitor | Zombie processes, memory hogs, swap pressure |
-| 8 | `SMAA/GLSL` | GPU Shader Compilation | WebGL shader linkage at runtime |
+**Tier 1 — Static Analysis & Build**
+
+| # | Instrument | What It Checks |
+|---|-----------|--------|
+| 1 | `tsc --noEmit` | TypeScript strict-mode type safety |
+| 2 | `eslint src/` | React hooks rules, unused vars, immutability |
+| 3 | `next build` | SSR/SSG page generation, bundle integrity |
+| 4 | `vitest run` | Unit tests — L402 validation, WASM heuristics, routing, pointer math |
+| 5 | Bundle Analyzer | JS chunk sizes, three.js tree-shaking, total static weight |
+
+**Tier 2 — Security**
+
+| # | Instrument | What It Checks |
+|---|-----------|--------|
+| 6 | `npm audit` | Dependency vulnerability scanning (CVE database) |
+| 7 | SAST Grep | OWASP Top 10 — XSS, eval, prototype pollution, command injection |
+| 8 | OPSEC Scan | Hardcoded secrets, API keys, wallet private keys in source |
+
+**Tier 3 — Infrastructure & Runtime**
+
+| # | Instrument | What It Checks |
+|---|-----------|--------|
+| 9 | `triarchy-sentinel` | Cross-file import graph blast radius analysis |
+| 10 | `vision-guardian` | YAML frontmatter, broken cross-refs, stealth edit detection |
+| 11 | `dungeon-forge audit` | ID collisions, orphan dungeons, stub detection |
+| 12 | `system-health` | Zombie processes, memory hogs, swap pressure |
+| 13 | GLSL Shader Compile | WebGL shader linkage validation at runtime |
+| 14 | Lighthouse CI | Core Web Vitals — FCP, LCP, CLS, mobile performance |
 
 ---
 
