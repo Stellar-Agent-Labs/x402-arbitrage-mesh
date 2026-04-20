@@ -50,7 +50,9 @@ Our Mesh is not just a firewall; it is a full-fledged economic engine for autono
 
 ### /// AESTHETIC: SOVEREIGN MATRIX UI
 We believe infrastructure dashboards shouldn't look like spreadsheets. We built a rigorous, **Awwwards-class cinematic interface** for the Sovereign Gateway:
-- **Liquid Glass Nebulas:** Custom WebGL fragment shaders driven by Three.js `NormalBlending` and Simplex Noise simulate floating cognitive networks.
+- **Lusion-Grade Particle Engine:** Custom GLSL fragment shaders with `linearStep + fwidth()` hardware-perfect antialiasing, depth-aware softness computed from camera distance, and Simplex Noise-driven motion.
+- **ScreenPaint Fluid Simulation:** FBO ping-pong 2D fluid dynamics — swipe or cursor movement physically displaces particles like liquid (Lusion Labs pattern, `pushStrength=25`, `velocityDissipation=0.985`).
+- **SMAA Post-Processing:** Subpixel Morphological Anti-Aliasing replaces 4x MSAA, saving ~75% GPU framebuffer memory on mobile devices.
 - **Physics-Inertial Cursor:** A magnetic Framer-Motion driven custom cursor seamlessly inverts background colors using `mix-blend-mode: difference`.
 - **Hyper-Terminal Bootloader:** Matrix-style fast boot sequencing before mounting the DOM.
 - **Theme Adapters:** Full dynamically shifting "Cyberpunk Dark" to "Premium Ascetic White" themes injected straight into WebGL contexts.
@@ -167,9 +169,12 @@ x402-triarchy-gateway/
 │   │   ├── layout.tsx           # App shell with SEO metadata
 │   │   └── page.tsx             # GPU-accelerated landing page
 │   ├── components/
-│   │   ├── LiquidGlassShader.tsx  # WebGL particle system (Simplex Noise)
+│   │   ├── LiquidGlassShader.tsx  # WebGL particle system (Lusion fwidth AA + SMAA)
+│   │   ├── ScreenPaint.tsx        # FBO fluid mouse simulation (Lusion Blueprint §5)
 │   │   ├── RefractiveCore.tsx     # Refractive glass icosahedron
 │   │   └── HollywoodTelemetry.tsx # Real-time terminal feed
+│   ├── hooks/
+│   │   └── useUnifiedPointer.ts   # Unified touch/mouse input normalizer [-1,1]
 │   └── lib/
 │       ├── soroban.ts           # Stellar Horizon RPC validator
 │       └── wasm_sandbox.ts      # Extism WASI 0.2 quarantine
@@ -212,12 +217,29 @@ This platform was engineered from the ground up to establish absolute sovereign 
 |---------------------|-------------------|--------------------|
 | **Core Desktop Node** | `Tauri v2`, `Rust` | Sovereign OS Wrapper, Local IPC, Native System Daemon |
 | **Zero-Trust Execute**| `Extism WASI 0.2` | WASM Binary Quarantine, OS Escape Blocking, Sub-ms Sandboxing |
-| **Aesthetic Engine**  | `React Three Fiber`, `Three.js`| WebGPU Liquid Glass Shaders, Neural Fragment Dynamics |
+| **Aesthetic Engine**  | `React Three Fiber`, `Three.js`| Lusion-Grade GLSL Shaders, ScreenPaint FBO Fluid Sim, SMAA, fwidth AA |
 | **Stellar Economy**   | `Soroban`, `L402 Protocol` | Smart Contract Task Verification, Horizon RPC, USDC Bounties |
 | **Identity Gateway**  | `Neynar API`, `Viem Multicall` | Farcaster Frame Gating, Deep ERC20 Wallet Validation |
 | **Frontend Matrix**   | `Next.js 16.2.2`, `React 19.2.4`| React Server Components (RSC), Edge Runtime, TailwindCSS 4 |
 | **Motion Physics**    | `Framer Motion 12`, `Lenis` | Inertial smooth scrolling, Multi-blend magnetic cursors |
 | **Agent Swarm L0**    | `MCP Paradigm`, `Systemd L0` | Inter-Agent Communication Loop, Autonomous Daemon Recovery |
+
+---
+
+/// MODULE: VERIFICATION STACK
+
+Every commit passes through our 8-instrument automated verification pipeline:
+
+| # | Instrument | Type | What It Checks |
+|---|-----------|------|---------|
+| 1 | `tsc --noEmit` | Static Analysis | TypeScript strict-mode type safety |
+| 2 | `eslint src/` | Linting | React hooks rules, unused vars, immutability |
+| 3 | `next build` | Production Build | SSR/SSG page generation, bundle integrity |
+| 4 | `triarchy-sentinel` | Blast Radius | Cross-file import graph impact analysis |
+| 5 | `vision-guardian` | File Watcher Audit | YAML frontmatter, broken cross-refs, stealth edits |
+| 6 | `dungeon-forge audit` | Structural Integrity | ID collisions, orphan dungeons, stub detection |
+| 7 | `system-health` | Runtime Monitor | Zombie processes, memory hogs, swap pressure |
+| 8 | `SMAA/GLSL` | GPU Shader Compilation | WebGL shader linkage at runtime |
 
 ---
 
