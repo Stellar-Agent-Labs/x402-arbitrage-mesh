@@ -33,6 +33,7 @@ export default function Dashboard() {
 	const [agentState, setAgentState] = useState<AgentState>("idle");
     const [progress, setProgress] = useState(0);
 	const stageRef = useRef<HTMLDivElement>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [wasiNodes, setWasiNodes] = useState<any[]>([]);
 	const [sysLoad, setSysLoad] = useState("0.00");
     const [inputValue, setInputValue] = useState("");
@@ -92,6 +93,7 @@ export default function Dashboard() {
             } else if (data.status === "rejected" || data.error) {
                 setAgentState("danger");
             }
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             setLastResult({ status: "error", error: e.message });
             setAgentState("danger");
@@ -131,24 +133,24 @@ export default function Dashboard() {
             }, 200);
             return () => clearInterval(int);
         } else if (agentState === "idle" || agentState === "thinking" || agentState === "exhausted") {
-            setProgress(0);
+            setTimeout(() => setProgress(0), 0);
         } else if (agentState === "success") {
-            setProgress(100);
+            setTimeout(() => setProgress(100), 0);
         }
     }, [agentState]);
 
     // Handle 100% completion side-effects safely outside the state updater
     useEffect(() => {
         if (agentState === "working" && progress >= 100) {
-            setAgentState("success");
+            setTimeout(() => setAgentState("success"), 0);
             // --- DEMO SUCCESS OVERRIDE LOGIC ---
             if (inputValue.toLowerCase().includes("demo") || inputValue.toLowerCase().includes("bounty") || inputValue.toLowerCase().includes("x402")) {
-                setBalance(b => b + 500);
-                setLastResult({
+                setTimeout(() => setBalance(b => b + 500), 0);
+                setTimeout(() => setLastResult({
                     status: "completed",
                     executor: "0x892a...3B9A",
                     result: "0x98f7c8b2... [Proof Verified]. Bounty executed with 0-Trust anomaly. 500 USDC dispensed."
-                });
+                }), 0);
                 // Play retro coin sound
                 try {
                     const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/bling_bonus.ogg");

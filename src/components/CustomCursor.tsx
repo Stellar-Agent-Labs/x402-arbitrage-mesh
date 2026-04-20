@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 
-export default function CustomCursor({ theme = "dark" }: { theme?: "dark" | "light" }) {
+export default function CustomCursor() {
 	const dotRef = useRef<HTMLDivElement>(null);
 	const [isHovering, setIsHovering] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
+	const [isTouch, setIsTouch] = useState(false);
 	const mousePos = useRef({ x: -100, y: -100 });
 	const currentPos = useRef({ x: -100, y: -100, scale: 1 });
 	const rafId = useRef<number>(0);
@@ -14,12 +15,20 @@ export default function CustomCursor({ theme = "dark" }: { theme?: "dark" | "lig
 	const LERP = 0.15;
 	const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+	// Check if this is a touch device on mound
+	useEffect(() => {
+		const isT = window.matchMedia("(pointer: coarse)").matches;
+		setTimeout(() => setIsTouch(isT), 0);
+	}, []);
+
 	// Keep hover ref in sync
 	useEffect(() => {
 		isHoveringRef.current = isHovering;
 	}, [isHovering]);
 
 	useEffect(() => {
+		if (isTouch) return;
+
 		// Hide native cursor
 		const style = document.createElement("style");
 		style.id = "hide-native-cursor";
@@ -70,9 +79,9 @@ export default function CustomCursor({ theme = "dark" }: { theme?: "dark" | "lig
 			const el = document.getElementById("hide-native-cursor");
 			if (el) el.remove();
 		};
-	}, [isVisible]);
+	}, [isVisible, isTouch]);
 
-	if (!isVisible) return null;
+	if (isTouch || !isVisible) return null;
 
 	return (
 		<div

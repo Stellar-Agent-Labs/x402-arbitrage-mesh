@@ -21,6 +21,30 @@
 	--foreground: #171717;
 	--font-heading: 'Helvetica Now Display', 'Inter', 'Helvetica Neue', sans-serif;
 	--font-body: 'Inter', 'DM Sans', 'Helvetica Neue', sans-serif;
+
+	/* Fluid spacing system */
+	--space-nav-x: clamp(16px, 4vw, 40px);
+	--space-nav-y: clamp(12px, 2vw, 20px);
+	--space-section: clamp(2rem, 6vw, 4rem);
+	--space-hero-top: clamp(10vh, 15vh, 20vh);
+	--space-content-x: clamp(1rem, 4vw, 2rem);
+
+	/* Fluid typography */
+	--text-hero: clamp(2.2rem, 6vw, 5rem);
+	--text-h2: clamp(1.5rem, 4vw, 2.5rem);
+	--text-h3: clamp(1.1rem, 2.5vw, 1.5rem);
+	--text-body: clamp(0.875rem, 2vw, 1.2rem);
+	--text-caption: clamp(0.7rem, 1.5vw, 0.85rem);
+	--text-mono: clamp(0.65rem, 1.2vw, 0.75rem);
+
+	/* Fixed element positions — fluid */
+	--pos-logo-top: clamp(20px, 3vw, 50px);
+	--pos-logo-left: clamp(16px, 3vw, 40px);
+	--pos-fab-bottom: clamp(16px, 3vw, 40px);
+	--pos-fab-right: clamp(16px, 3vw, 40px);
+
+	/* Touch target minimum (Apple HIG) */
+	--tap-target: 44px;
 }
 
 @theme inline {
@@ -320,5 +344,88 @@ html.lenis, html.lenis body {
   display: inline-block;
 }
 .connect-btn-hover-fx:hover span {
-  animation: text-breathe 2s ease-in-out infinite;
+	animation: text-breathe 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS — LUSION-GRADE ADAPTIVE
+   Single dynamic codebase. No separate mobile pack.
+   ============================================================ */
+
+/* MOBILE: ≤768px — Stack, simplify, enlarge targets */
+@media (max-width: 768px) {
+	/* Nav compact */
+	.nav-actions {
+		gap: 8px !important;
+	}
+
+	/* Stats row wrap */
+	.green-sweep-stats {
+		flex-wrap: wrap;
+		gap: 0.5rem !important;
+		justify-content: center;
+	}
+
+	/* Snake borders — disable complex animation on mobile (perf) */
+	.snake-border::before,
+	.rare-snake-border::after {
+		animation: none;
+		opacity: 0.3;
+	}
+}
+
+/* SMALL MOBILE: ≤480px — Extreme compact */
+@media (max-width: 480px) {
+	.connect-btn-base {
+		padding: 8px 16px;
+		font-size: 0.65rem;
+		letter-spacing: 0.08em;
+	}
+}
+
+/* TOUCH DEVICES — No hover effects, enlarge targets */
+@media (pointer: coarse) {
+	/* Disable custom cursor entirely — handled in component */
+
+	/* Enlarge all interactive elements for thumb */
+	button, a, [role="button"] {
+		min-height: var(--tap-target);
+		min-width: var(--tap-target);
+	}
+
+	/* Disable hover-only animations on touch */
+	.connect-btn-hover-fx:hover {
+		animation: none;
+	}
+	.connect-btn-hover-fx:hover span {
+		animation: none;
+	}
+	.snake-border:hover::before {
+		animation-duration: 10s;
+		opacity: 0.7;
+	}
+}
+
+/* DESKTOP ONLY — Fine pointer, enable full Lusion hover system */
+@media (pointer: fine) {
+	/* All hover effects work naturally via existing CSS */
+	/* Custom cursor enabled — handled in component */
+}
+
+/* REDUCED MOTION — Accessibility */
+@media (prefers-reduced-motion: reduce) {
+	.snake-border::before,
+	.rare-snake-border::after,
+	.micro-drift,
+	.green-sweep-text,
+	.green-sweep-stats {
+		animation: none !important;
+	}
+}
+
+/* LANDSCAPE PHONE — Prevent hero from being too tall */
+@media (max-height: 500px) and (orientation: landscape) {
+	:root {
+		--space-hero-top: 5vh;
+	}
 }

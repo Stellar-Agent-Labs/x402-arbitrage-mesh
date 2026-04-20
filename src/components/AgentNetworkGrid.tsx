@@ -35,7 +35,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 		: hovered 
 			? (theme === "dark" ? "rgba(0,255,65,0.5)" : "rgba(0,100,34,0.4)")
 			: (theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)");
-	let statusColor = isQuarantined 
+	const statusColor = isQuarantined 
 		? "#ff003c" 
 		: hovered 
 			? (theme === "dark" ? "#00ff41" : "#006622")
@@ -188,7 +188,8 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				if (res.ok) {
 					const data = await res.json();
 					if (data.agents && data.agents.length > 0) {
-						let mapped: AgentDisplay[] = data.agents.map((a: any) => ({
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						const mapped: AgentDisplay[] = data.agents.map((a: any) => ({
 							id: a.id,
 							task: a.capabilities?.[0] || "General",
 							rep: a.reputationScore?.toFixed(1) || "0.0",
@@ -271,10 +272,10 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 			<div
 				style={{
 					display: "grid",
-                    // Bento grid: 2 columns absolute max.
-					gridTemplateColumns: "repeat(2, 1fr)",
+                    // Bento grid: adaptive auto-fit
+					gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
 					gridAutoRows: "minmax(280px, auto)",
-					gap: "3.5rem",
+					gap: "clamp(1.5rem, 4vw, 3.5rem)",
 					paddingBottom: "3rem",
                     perspective: "1200px" // Required for the Lusion 3D tilt interaction
 				}}

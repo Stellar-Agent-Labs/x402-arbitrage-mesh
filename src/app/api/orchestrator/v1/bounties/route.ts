@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
             timestamp: new Date().toISOString(),
         }, { status: hireResp.ok ? 200 : hireResp.status });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return NextResponse.json(
-            { error: "Orchestrator ingestion failed", details: error.message },
+            { error: "Orchestrator ingestion failed", details: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
         );
     }

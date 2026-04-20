@@ -1,24 +1,36 @@
 "use client";
 import { Stars } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
 	Bloom,
 	ChromaticAberration,
 	EffectComposer,
 	Noise,
+	SMAA,
 	Vignette,
 } from "@react-three/postprocessing";
+import { SMAAPreset } from "postprocessing";
 import { BlendFunction } from "postprocessing";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 import RefractiveCore from "./RefractiveCore";
+import ScreenPaint from "./ScreenPaint";
 
 const PARTICLE_COUNT = 3000;
 
+// Lusion-grade softness constants (from Blueprint §3, строка 48763)
+const U_FOCUS_DIST = 0.32;
+const U_P_SOFT_MUL = 0.92;
+const U_OPACITY = 0.32;
+
 const vertexShader = `
   uniform float uTime;
+  uniform vec2 uResolution;
   attribute vec3 customColor;
   varying vec3 vColor;
+  varying float vSoftness;
+  varying float vOpacity;
   vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
   vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
   
@@ -78,12 +90,22 @@ const vertexShader = `
     
     vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
-    gl_PointSize = max(2.5, (55.0 / -mvPosition.z));
+    float baseSize = max(2.5, (55.0 / -mvPosition.z));
+    
+    // Lusion proportional scaling: particles scale with screen height
+    gl_PointSize = baseSize * max(0.5, (uResolution.y / 1280.0));
+
+    // Lusion depth-aware softness (Blueprint §3, строки 48602-48164)
+    float focusDist = ${U_FOCUS_DIST} * 10.0;
+    float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
+    vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
+    vOpacity = ${U_OPACITY};
   }
 `;
 
 function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	const pointsRef = useRef<THREE.Points>(null);
+	const { size } = useThree();
 
 	const [[positions, colors]] = useState(() => {
 		const pos = new Float32Array(PARTICLE_COUNT * 3);
@@ -113,8 +135,9 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 		() => ({
 			uTime: { value: 0 },
 			uTheme: { value: theme === "dark" ? 0.0 : 1.0 }, // Pass theme to shader
+			uResolution: { value: new THREE.Vector2(size.width, size.height) },
 		}),
-		[theme],
+		[theme, size],
 	);
 
     // Update uniform when theme changes
@@ -132,18 +155,29 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 		pointsRef.current.rotation.x = time * 0.002;
 	});
 
+    // Lusion-exact fragment shader: linearStep + fwidth() for hardware AA (Blueprint §3, строка 48604)
     const themedFragmentShader = `
+      #extension GL_OES_standard_derivatives : enable
       varying vec3 vColor;
+      varying float vSoftness;
+      varying float vOpacity;
       uniform float uTheme;
+
+      float linearStep(float edge0, float edge1, float x) {
+        return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+      }
+
       void main() {
-        float dist = length(gl_PointCoord - vec2(0.5));
-        if (dist > 0.5) discard;
-        float alpha = 0.35 * (1.0 - dist * 2.0);
-        
-        // If theme is light, make particles grey/dark
+        // Lusion coordinate space: [-1, 1] from center (not [0, 1])
+        float d = length(gl_PointCoord.xy * 2.0 - 1.0);
+        // fwidth(d) = GPU-computed pixel width → hardware-perfect AA on small particles
+        float b = linearStep(0.0, vSoftness + fwidth(d), 1.0 - d);
+
+        // Theme: dark = original color, light = dark grey
         vec3 finalColor = mix(vColor, vec3(0.05, 0.05, 0.05), uTheme);
-        
-        gl_FragColor = vec4(finalColor, alpha);
+
+        vec3 color = finalColor * b * vOpacity;
+        gl_FragColor = vec4(color, b * vOpacity);
       }
     `;
 
@@ -159,7 +193,9 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 				uniforms={uniforms}
 				transparent
 				depthWrite={false}
+				depthTest={false}
 				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
+				extensions-derivatives={true}
 			/>
 		</points>
 	);
@@ -190,20 +226,28 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 }
 
 export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
+	const pointerRef = useUnifiedPointer();
+	const paintTextureRef = useRef<THREE.Texture | null>(null);
+
+	const handlePaintTexture = useCallback((tex: THREE.Texture) => {
+		paintTextureRef.current = tex;
+	}, []);
+
 	return (
 		<div
 			style={{
 				position: "fixed",
 				inset: 0,
 				zIndex: -1,
-				pointerEvents: "none",
+				pointerEvents: "auto",
 				touchAction: "none",
 			}}
 		>
-			<Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 45 }}>
+			<Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 15], fov: 45 }}>
 				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 				
-				{/* УДАЛЕНА HDRI КАРТА СТУДИИ: теперь круг преломляет только космос и свет, никаких софтбоксов */}
+				{/* ScreenPaint: Lusion fluid mouse simulation (Blueprint §5) */}
+				<ScreenPaint pointerRef={pointerRef} onTextureReady={handlePaintTexture} />
 
 				{/* Core Lighting & Voltage Surges */}
 				<VoltageLights theme={theme} />
@@ -220,8 +264,9 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				<LiquidNebula theme={theme} />
 				<RefractiveCore />
 
-				{/* Lusion Extreme Post-Processing */}
-				<EffectComposer multisampling={4}>
+				{/* Lusion Post-Processing: SMAA replaces 4x MSAA (saves ~75% GPU memory) */}
+				<EffectComposer multisampling={0}>
+					<SMAA preset={SMAAPreset.HIGH} />
 					<Bloom
 						luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
 						mipmapBlur

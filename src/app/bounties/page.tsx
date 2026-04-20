@@ -57,9 +57,9 @@ const BountiesPage = () => {
 				setEscrowStatus("success");
 				setEscrowResult(`✓ ESCROW SECURED (Freighter: ${userPubKey.substring(0,6)}...${userPubKey.slice(-4)})`);
 			}, 1500);
-		} catch (e: any) {
+		} catch (e: unknown) {
 			setEscrowStatus("error");
-			setEscrowResult(`FREIGHTER REJECTED: ${e.message || "Connection denied"}`);
+			setEscrowResult(`FREIGHTER REJECTED: ${e instanceof Error ? e.message : "Connection denied"}`);
 		}
 	};
 
@@ -162,7 +162,7 @@ const BountiesPage = () => {
 					{/* 2. Left Column: Bounty Table */}
 					<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 						<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
-							<h3 style={{ margin: 0, fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.8)" }}>// ACTIVE CONTRACTS</h3>
+							<h3 style={{ margin: 0, fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.8)" }}>{"// ACTIVE CONTRACTS"}</h3>
 							<button style={{ padding: "8px 16px", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "4px", fontSize: "0.75rem" }}>FILTER: OPEN</button>
 						</div>
 

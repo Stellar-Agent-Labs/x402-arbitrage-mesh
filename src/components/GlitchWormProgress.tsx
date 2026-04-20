@@ -16,9 +16,9 @@ export function GlitchWormProgress({ progress }: GlitchWormProps) {
 
     useEffect(() => {
         if (safeProgress === 100) {
-            setGlitching(true);
+            setTimeout(() => setGlitching(true), 0);
         } else {
-            setGlitching(false);
+            setTimeout(() => setGlitching(false), 0);
         }
     }, [safeProgress]);
 

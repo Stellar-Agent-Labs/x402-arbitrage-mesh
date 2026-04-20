@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 const FONT_BODY = "'Inter', 'DM Sans', sans-serif";
@@ -48,76 +48,9 @@ const palette = {
 // CSS transition for all Lusion hover elements
 const lusionTransition = "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
 
-function ScrollLogo({ theme }: { theme: "dark" | "light" }) {
-	const p = palette[theme];
-	const { scrollY } = useScroll();
-	const fontSize = useTransform(scrollY, [0, 200], ["1.5rem", "1.2rem"]);
-	const opacityFull = useTransform(scrollY, [0, 100], [1, 0]);
-	const opacitySmall = useTransform(scrollY, [100, 200], [0, 1]);
-	const [hovered, setHovered] = useState(false);
-
-	return (
-		<motion.div
-			style={{
-				position: "fixed",
-				top: 50,
-				left: 40,
-				zIndex: 100,
-				display: "flex",
-				alignItems: "center",
-				cursor: "pointer",
-			}}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
-		>
-			<motion.div 
-				style={{ 
-					fontWeight: 500, 
-					fontSize: fontSize, 
-					color: hovered ? p.accentHover : p.accent, 
-					fontFamily: FONT_HEADING,
-					marginRight: 10,
-					transition: lusionTransition,
-					textShadow: hovered ? `0 0 20px ${p.glowHover}` : "none",
-				}}
-			>
-				⬢
-			</motion.div>
-			<motion.div
-				style={{
-					opacity: opacityFull,
-					color: hovered ? p.accentHover : p.text,
-					fontFamily: FONT_HEADING,
-					fontWeight: 500,
-					whiteSpace: "nowrap",
-					overflow: "hidden",
-					letterSpacing: "0.05em",
-					transition: lusionTransition,
-				}}
-			>
-				TRIARCHY LABS
-			</motion.div>
-			<motion.div
-				style={{
-					position: "absolute",
-					left: 25,
-					opacity: opacitySmall,
-					color: hovered ? p.accentHover : p.accent,
-					fontFamily: FONT_HEADING,
-					fontWeight: 500,
-					whiteSpace: "nowrap",
-					transition: lusionTransition,
-				}}
-			>
-				x402
-			</motion.div>
-		</motion.div>
-	);
-}
 
 function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
 	const p = palette[theme];
-	const [hovered, setHovered] = useState(false);
 	return (
 		<motion.div
 			initial={{ y: 50, opacity: 0 }}
@@ -129,6 +62,8 @@ function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
 				margin: "4rem auto 8rem auto",
 				width: "fit-content",
 				display: "flex",
+				flexWrap: "wrap",
+				justifyContent: "center",
 				gap: "24px",
 				alignItems: "center",
 			}}
@@ -273,7 +208,6 @@ export default function Page() {
 	const [hoverTheme, setHoverTheme] = useState(false);
 	const [hoverGithub, setHoverGithub] = useState(false);
 	const [hoverCTA, setHoverCTA] = useState(false);
-	const [hoverFooterCTA, setHoverFooterCTA] = useState(false);
 	const [hover3d, setHover3d] = useState(false);
 
 	// Magnetic cursor offsets
@@ -297,7 +231,7 @@ export default function Page() {
 
 			{booted && (
 				<>
-					<CustomCursor theme={theme} />
+					<CustomCursor />
 					<SystemWidget />
 					<Nav />
 
@@ -313,8 +247,8 @@ export default function Page() {
 						onMouseLeave={() => { setHoverTheme(false); setOffsetTheme({x:0,y:0}); }}
 						style={{
 							position: "fixed",
-							bottom: 40,
-							right: 40,
+							bottom: "var(--pos-fab-bottom)",
+							right: "var(--pos-fab-right)",
 							zIndex: 100,
 							padding: "10px 24px",
 							background: hoverTheme ? p.glassBgHover : p.glassBg,
@@ -350,8 +284,8 @@ export default function Page() {
 						onMouseLeave={() => { setHoverGithub(false); setOffsetGithub({x:0,y:0}); }}
 						style={{
 							position: "fixed",
-							bottom: 40,
-							right: 170,
+							bottom: "var(--pos-fab-bottom)",
+							right: "calc(var(--pos-fab-right) + 130px)",
 							zIndex: 100,
 							width: 44,
 							height: 44,

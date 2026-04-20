@@ -88,7 +88,7 @@ export function Nav() {
 				display: "flex",
 				justifyContent: "space-between",
 				alignItems: "center",
-				padding: "0 40px",
+				padding: "0 var(--space-nav-x)",
 				zIndex: 100,
 				background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)",
 				pointerEvents: "none",
@@ -113,7 +113,7 @@ export function Nav() {
                     style={{ overflow: "hidden", whiteSpace: "nowrap" }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 >
-                    <span style={{ 
+                    <span className="hidden sm:inline" style={{ 
                         fontFamily: '"Space Mono", monospace', 
                         fontSize: "0.85rem", 
                         fontWeight: "bold",
@@ -127,7 +127,7 @@ export function Nav() {
                 </motion.div>
 			</div>
 
-			<div style={{ pointerEvents: "auto", display: "flex", gap: "24px", alignItems: "center", position: "relative" }}>
+			<div className="nav-actions" style={{ pointerEvents: "auto", display: "flex", gap: "24px", alignItems: "center", position: "relative" }}>
 				<button
 					onClick={() => window.location.href = "/dashboard"}
 					style={{
