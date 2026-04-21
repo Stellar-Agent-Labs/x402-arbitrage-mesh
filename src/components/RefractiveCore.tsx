@@ -33,12 +33,12 @@ export default function RefractiveCore({ tier = "high" }: { tier?: DeviceTier })
 		if (meshRef.current) {
 			meshRef.current.rotation.x = state.clock.elapsedTime * 0.15;
 			meshRef.current.rotation.y = state.clock.elapsedTime * 0.25;
-			meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.3;
+			// No bobbing — fixed at hero title position
 		}
 	});
 
 	return (
-		<Icosahedron ref={meshRef} args={[3.5, 4]} position={[0, 0, 0]}>
+		<Icosahedron ref={meshRef} args={[3.5, 4]} position={[0, 3, 0]}>
 			<MeshTransmissionMaterial
 				backside
 				samples={cfg.samples}

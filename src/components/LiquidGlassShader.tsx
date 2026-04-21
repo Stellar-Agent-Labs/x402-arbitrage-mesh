@@ -242,7 +242,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
 				<FsrRcasPass sharpness={1.0} />
-				{/* LusionFinalPass disabled — tint blend creates gray overlay */}
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
 			</EffectComposer>
 		);
 	}
@@ -256,9 +256,9 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				{/* LensHaloPass disabled — creates center overexposure on our scene */}
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
-					offset={new THREE.Vector2(0.003, 0.003)}
+					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
-				{/* LusionFinalPass disabled — tint blend creates gray overlay */}
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
 				{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 			</EffectComposer>
 		);
@@ -273,10 +273,10 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			{/* LensHaloPass disabled */}
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
-				offset={new THREE.Vector2(0.003, 0.003)}
+				offset={new THREE.Vector2(0.001, 0.001)}
 			/>
 			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
-			{/* LusionFinalPass disabled — tint blend creates gray overlay */}
+			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
 			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 		</EffectComposer>
 	);
@@ -325,8 +325,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
 				{tier !== "low" && <RefractiveCore tier={tier} />}
 
-				{/* Lusion BrownianMotion camera shake (строка 48928-49034) */}
-				{/* Camera shake: slowed 20% from Lusion defaults per Creator feedback */}
+				{/* Lusion BrownianMotion camera shake — slowed 20% per Creator */}
 				<BrownianMotionCamera positionSpeed={0.096} rotationSpeed={0.24} />
 
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
