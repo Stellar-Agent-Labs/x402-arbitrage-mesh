@@ -198,6 +198,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 				depthWrite={false}
 				depthTest={false}
 				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
+				extensions-derivatives={true}
 			/>
 		</points>
 	);
