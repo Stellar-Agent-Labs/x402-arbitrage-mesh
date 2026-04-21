@@ -18,6 +18,8 @@ import RefractiveCore from "./RefractiveCore";
 import ScreenPaint from "./ScreenPaint";
 import LusionFinalPass from "./LusionFinalPass";
 import ScreenPaintDistortion from "./ScreenPaintDistortion";
+import BrownianMotionCamera from "./BrownianMotionCamera";
+import FsrRcasPass from "./FsrRcasPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
@@ -226,11 +228,11 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 /**
  * Adaptive post-processing pipeline — Lusion-grade (Blueprint §FSR + §SMAA)
  * Pipeline order matches Lusion exactly (строка 49553-49555):
- *   Scene → SMAA → Bloom → LusionFinalPass(vignette+dither+color) → ScreenPaintDistortion
+ *   Scene → SMAA → FSR RCAS → Bloom → LusionFinalPass(vignette+dither+color) → ScreenPaintDistortion
  *
- * High: Full pipeline (SMAA HIGH + Bloom + ChromaticAberration + Noise + LusionFinal + ScreenPaintDistortion)
- * Mid:  Reduced pipeline (SMAA MEDIUM + Bloom reduced + LusionFinal + ScreenPaintDistortion)
- * Low:  Minimal pipeline (SMAA LOW + LusionFinal only)
+ * High: Full pipeline (SMAA HIGH + FSR RCAS + Bloom + ChromaticAberration + Noise + LusionFinal + ScreenPaintDistortion)
+ * Mid:  Reduced pipeline (SMAA MEDIUM + FSR RCAS + Bloom reduced + LusionFinal + ScreenPaintDistortion)
+ * Low:  Minimal pipeline (SMAA LOW + FSR RCAS + LusionFinal only)
  */
 function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
 	const cfg = TIER_CONFIG[tier];
@@ -239,6 +241,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
+				<FsrRcasPass sharpness={1.0} />
 				<LusionFinalPass theme={theme} />
 			</EffectComposer>
 		);
@@ -248,6 +251,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
+				<FsrRcasPass sharpness={1.0} />
 				<Bloom
 					luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
 					mipmapBlur
@@ -268,6 +272,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
+			<FsrRcasPass sharpness={1.0} />
 			<Bloom
 				luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
 				mipmapBlur
@@ -327,6 +332,9 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				
 				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
 				{tier !== "low" && <RefractiveCore tier={tier} />}
+
+				{/* Lusion BrownianMotion camera shake (строка 48928-49034) */}
+				<BrownianMotionCamera />
 
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
 				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTextureRef.current} />
