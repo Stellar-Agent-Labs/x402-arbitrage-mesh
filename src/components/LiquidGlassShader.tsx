@@ -252,12 +252,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
 				<FsrRcasPass sharpness={1.0} />
-				<Bloom
-					luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
-					mipmapBlur
-					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
-					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
-				/>
+				{/* Bloom disabled — causes full overexposure without aggressive vignette */}
 				{/* LensHaloPass disabled — creates center overexposure on our scene */}
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
@@ -274,13 +269,8 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
 			<FsrRcasPass sharpness={1.0} />
-			<Bloom
-				luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
-				mipmapBlur
-				intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
-				blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
-			/>
-			<LensHaloPass />
+			{/* Bloom disabled — causes full overexposure without aggressive vignette */}
+			{/* LensHaloPass disabled */}
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.003, 0.003)}
