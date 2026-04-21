@@ -260,7 +260,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
 					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 				/>
-				<LensHaloPass haloWidth={0.12} haloRGBShift={0.02} haloStrength={0.08} />
+				<LensHaloPass />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
