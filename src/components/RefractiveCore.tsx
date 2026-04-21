@@ -33,7 +33,9 @@ export default function RefractiveCore({ tier = "high" }: { tier?: DeviceTier })
 		if (meshRef.current) {
 			meshRef.current.rotation.x = state.clock.elapsedTime * 0.15;
 			meshRef.current.rotation.y = state.clock.elapsedTime * 0.25;
-			// No bobbing — fixed at hero title position
+			// Track camera to stay fixed at hero title zone regardless of BrownianMotion
+			const cam = state.camera.position;
+			meshRef.current.position.set(cam.x, cam.y + 1.5, 0);
 		}
 	});
 
