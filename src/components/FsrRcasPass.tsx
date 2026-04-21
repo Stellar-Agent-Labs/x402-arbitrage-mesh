@@ -17,7 +17,7 @@
 
 import { forwardRef, useMemo } from "react";
 import { Effect, BlendFunction } from "postprocessing";
-import { Uniform, Vector2 } from "three";
+import { Uniform } from "three";
 
 // Exact GLSL from Lusion lines 42243-42249
 const fragment = /* glsl */ `

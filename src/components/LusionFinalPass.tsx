@@ -13,7 +13,7 @@
  * Every constant, function name, and formula is verified against the dump.
  */
 
-import { forwardRef, useMemo, useRef } from "react";
+import { forwardRef, useMemo } from "react";
 import { Effect, BlendFunction } from "postprocessing";
 import { Uniform, Vector2 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";

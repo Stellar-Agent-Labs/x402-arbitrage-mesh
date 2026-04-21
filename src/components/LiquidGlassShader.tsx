@@ -20,6 +20,7 @@ import LusionFinalPass from "./LusionFinalPass";
 import ScreenPaintDistortion from "./ScreenPaintDistortion";
 import BrownianMotionCamera from "./BrownianMotionCamera";
 import FsrRcasPass from "./FsrRcasPass";
+import LensHaloPass from "./LensHaloPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
@@ -258,6 +259,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
 					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 				/>
+				<LensHaloPass />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
@@ -279,6 +281,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
 				blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 			/>
+			<LensHaloPass />
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.003, 0.003)}
@@ -292,12 +295,12 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 
 export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	const pointerRef = useUnifiedPointer();
-	const paintTextureRef = useRef<THREE.Texture | null>(null);
+	const [paintTexture, setPaintTexture] = useState<THREE.Texture | null>(null);
 	const tier = useDeviceTier();
 	const cfg = TIER_CONFIG[tier];
 
 	const handlePaintTexture = useCallback((tex: THREE.Texture) => {
-		paintTextureRef.current = tex;
+		setPaintTexture(tex);
 	}, []);
 
 	return (
@@ -337,7 +340,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				<BrownianMotionCamera />
 
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
-				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTextureRef.current} />
+				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTexture} />
 			</Canvas>
 		</div>
 	);
