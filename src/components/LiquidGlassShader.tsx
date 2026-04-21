@@ -242,7 +242,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
 				<FsrRcasPass sharpness={1.0} />
-				<LusionFinalPass theme={theme} />
+				{/* LusionFinalPass disabled — tint blend creates gray overlay */}
 			</EffectComposer>
 		);
 	}
@@ -258,7 +258,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
 				/>
-				<LusionFinalPass theme={theme} />
+				{/* LusionFinalPass disabled — tint blend creates gray overlay */}
 				{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 			</EffectComposer>
 		);
@@ -276,7 +276,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				offset={new THREE.Vector2(0.003, 0.003)}
 			/>
 			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
-			<LusionFinalPass theme={theme} />
+			{/* LusionFinalPass disabled — tint blend creates gray overlay */}
 			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 		</EffectComposer>
 	);
