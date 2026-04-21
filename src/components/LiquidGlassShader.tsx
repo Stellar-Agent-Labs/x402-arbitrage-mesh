@@ -210,11 +210,9 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 
 	useFrame(() => {
 		if (theme === "dark" && dirLight.current && ptLight.current) {
-			// Subtle breathing — no harsh spikes (no stroboscopic pulsation)
-			const isSurge = Math.random() > 0.995; // much rarer surges
-			const voltage = isSurge ? Math.random() * 3 + 3 : Math.random() * 0.3 + 2.5;
-			dirLight.current.intensity = THREE.MathUtils.lerp(dirLight.current.intensity, voltage, 0.08);
-			ptLight.current.intensity = THREE.MathUtils.lerp(ptLight.current.intensity, voltage + 1, 0.08);
+			// Constant stable lighting — no pulsation/flickering
+			dirLight.current.intensity = 2.8;
+			ptLight.current.intensity = 4.0;
 		}
 	});
 
@@ -266,7 +264,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					offset={new THREE.Vector2(0.003, 0.003)}
 				/>
 				<LusionFinalPass theme={theme} />
-				<ScreenPaintDistortion paintTexture={paintTexture} amount={4} multiplier={1} colorMultiplier={2} shade={0.3} />
+				{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 			</EffectComposer>
 		);
 	}
@@ -289,7 +287,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			/>
 			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
 			<LusionFinalPass theme={theme} />
-			<ScreenPaintDistortion paintTexture={paintTexture} amount={4} multiplier={1} colorMultiplier={2} shade={0.3} />
+			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 		</EffectComposer>
 	);
 }
