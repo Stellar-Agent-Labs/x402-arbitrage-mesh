@@ -165,7 +165,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	});
 
     const themedFragmentShader = `
-      #extension GL_OES_standard_derivatives : enable
+      // WebGL2: fwidth/dFdx are built-in, no #extension needed
       varying vec3 vColor;
       varying float vSoftness;
       varying float vOpacity;
@@ -198,7 +198,6 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 				depthWrite={false}
 				depthTest={false}
 				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
-				extensions-derivatives={true}
 			/>
 		</points>
 	);
