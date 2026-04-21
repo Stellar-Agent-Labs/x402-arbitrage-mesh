@@ -38,7 +38,7 @@ export default function RefractiveCore({ tier = "high" }: { tier?: DeviceTier })
 	});
 
 	return (
-		<Icosahedron ref={meshRef} args={[3.5, 4]} position={[0, 3, 0]}>
+		<Icosahedron ref={meshRef} args={[3.5, 4]} position={[0, 1.5, 0]}>
 			<MeshTransmissionMaterial
 				backside
 				samples={cfg.samples}
