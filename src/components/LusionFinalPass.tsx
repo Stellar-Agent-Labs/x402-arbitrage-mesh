@@ -92,8 +92,8 @@ class LusionFinalEffect extends Effect {
   constructor({
     bgColor = [0.004, 0.008, 0.004], // #010201
     opacity = 1.0,
-    vignetteFrom = 0.6,    // Lusion default line 42699
-    vignetteTo = 1.6,      // Lusion default line 42700
+    vignetteFrom = 1.2,    // Pushed far out (Lusion default was 0.6 — too aggressive)
+    vignetteTo = 2.5,      // Pushed far out (Lusion default was 1.6)
     vignetteColor = [0, 0, 0],
     saturation = 0,         // Lusion: saturation - 1 = 0 (neutral)
     contrast = 0,           // Lusion: contrast = 0 (neutral)
@@ -140,8 +140,8 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
   ref
 ) {
   const {
-    vignetteFrom = 0.6,
-    vignetteTo = 1.6,
+    vignetteFrom = 1.2,
+    vignetteTo = 2.5,
     saturation = 0,
     contrast = 0,
     brightness = 0,
