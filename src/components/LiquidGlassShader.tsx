@@ -91,7 +91,7 @@ const vertexShader = `
     vColor = customColor;
     vec3 pos = position;
     
-    float phase = uTime * 0.04; 
+    float phase = uTime * 0.10; // visible drift speed
     float n1 = snoise(pos * 0.35 + phase) * 0.9; 
     float n2 = snoise(pos.yzx * 0.35 + phase + 10.0) * 0.9;
     float n3 = snoise(pos.zxy * 0.35 + phase + 20.0) * 0.9;
@@ -160,8 +160,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		if (!pointsRef.current) return;
 		const time = state.clock.elapsedTime;
 		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
-		pointsRef.current.rotation.y = time * 0.005;
-		pointsRef.current.rotation.x = time * 0.002;
+		pointsRef.current.rotation.y = time * 0.015;
+		pointsRef.current.rotation.x = time * 0.008;
 	});
 
     const themedFragmentShader = `
@@ -209,10 +209,11 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 
 	useFrame(() => {
 		if (theme === "dark" && dirLight.current && ptLight.current) {
-			const isSurge = Math.random() > 0.96;
-			const voltage = isSurge ? Math.random() * 15 + 5 : Math.random() * 0.5 + 2;
-			dirLight.current.intensity = THREE.MathUtils.lerp(dirLight.current.intensity, voltage, 0.5);
-			ptLight.current.intensity = THREE.MathUtils.lerp(ptLight.current.intensity, voltage + 3, 0.5);
+			// Subtle breathing — no harsh spikes (no stroboscopic pulsation)
+			const isSurge = Math.random() > 0.995; // much rarer surges
+			const voltage = isSurge ? Math.random() * 3 + 3 : Math.random() * 0.3 + 2.5;
+			dirLight.current.intensity = THREE.MathUtils.lerp(dirLight.current.intensity, voltage, 0.08);
+			ptLight.current.intensity = THREE.MathUtils.lerp(ptLight.current.intensity, voltage + 1, 0.08);
 		}
 	});
 
@@ -258,7 +259,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
 					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 				/>
-				<LensHaloPass />
+				<LensHaloPass haloWidth={0.12} haloRGBShift={0.02} haloStrength={0.08} />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
@@ -336,7 +337,8 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{tier !== "low" && <RefractiveCore tier={tier} />}
 
 				{/* Lusion BrownianMotion camera shake (строка 48928-49034) */}
-				<BrownianMotionCamera />
+				{/* Camera shake: slowed 20% from Lusion defaults per Creator feedback */}
+				<BrownianMotionCamera positionSpeed={0.096} rotationSpeed={0.24} />
 
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
 				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTexture} />
