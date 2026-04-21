@@ -266,7 +266,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					offset={new THREE.Vector2(0.003, 0.003)}
 				/>
 				<LusionFinalPass theme={theme} />
-				<ScreenPaintDistortion paintTexture={paintTexture} />
+				<ScreenPaintDistortion paintTexture={paintTexture} amount={4} multiplier={1} colorMultiplier={2} shade={0.3} />
 			</EffectComposer>
 		);
 	}
@@ -289,7 +289,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			/>
 			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
 			<LusionFinalPass theme={theme} />
-			<ScreenPaintDistortion paintTexture={paintTexture} />
+			<ScreenPaintDistortion paintTexture={paintTexture} amount={4} multiplier={1} colorMultiplier={2} shade={0.3} />
 		</EffectComposer>
 	);
 }
