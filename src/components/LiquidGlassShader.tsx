@@ -14,10 +14,16 @@ import { BlendFunction } from "postprocessing";
 import { useCallback, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
+import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
 import RefractiveCore from "./RefractiveCore";
 import ScreenPaint from "./ScreenPaint";
 
-const PARTICLE_COUNT = 3000;
+// Lusion-grade adaptive constants per device tier
+const TIER_CONFIG = {
+	high: { particles: 3000, stars: 6000, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
+	mid:  { particles: 1500, stars: 3000, smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
+	low:  { particles: 800,  stars: 1500, smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
+};
 
 // Lusion-grade softness constants (from Blueprint §3, строка 48763)
 const U_FOCUS_DIST = 0.32;
@@ -103,17 +109,17 @@ const vertexShader = `
   }
 `;
 
-function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
+function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; particleCount: number }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const { size } = useThree();
 
 	const [[positions, colors]] = useState(() => {
-		const pos = new Float32Array(PARTICLE_COUNT * 3);
-		const col = new Float32Array(PARTICLE_COUNT * 3);
+		const pos = new Float32Array(particleCount * 3);
+		const col = new Float32Array(particleCount * 3);
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
+		for (let i = 0; i < particleCount; i++) {
 			const theta = Math.random() * 2 * Math.PI;
 			const v = Math.random();
 			const phi = Math.acos(2 * v - 1);
@@ -134,13 +140,12 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	const uniforms = useMemo(
 		() => ({
 			uTime: { value: 0 },
-			uTheme: { value: theme === "dark" ? 0.0 : 1.0 }, // Pass theme to shader
+			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
 			uResolution: { value: new THREE.Vector2(size.width, size.height) },
 		}),
 		[theme, size],
 	);
 
-    // Update uniform when theme changes
     useFrame(() => {
         if (pointsRef.current) {
             (pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
@@ -155,7 +160,6 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 		pointsRef.current.rotation.x = time * 0.002;
 	});
 
-    // Lusion-exact fragment shader: linearStep + fwidth() for hardware AA (Blueprint §3, строка 48604)
     const themedFragmentShader = `
       #extension GL_OES_standard_derivatives : enable
       varying vec3 vColor;
@@ -168,14 +172,9 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
       }
 
       void main() {
-        // Lusion coordinate space: [-1, 1] from center (not [0, 1])
         float d = length(gl_PointCoord.xy * 2.0 - 1.0);
-        // fwidth(d) = GPU-computed pixel width → hardware-perfect AA on small particles
         float b = linearStep(0.0, vSoftness + fwidth(d), 1.0 - d);
-
-        // Theme: dark = original color, light = dark grey
         vec3 finalColor = mix(vColor, vec3(0.05, 0.05, 0.05), uTheme);
-
         vec3 color = finalColor * b * vOpacity;
         gl_FragColor = vec4(color, b * vOpacity);
       }
@@ -201,14 +200,12 @@ function LiquidNebula({ theme }: { theme: "dark" | "light" }) {
 	);
 }
 
-// Эффект скачков напряжения для темной темы и стабильный свет для светлой
 function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 	const dirLight = useRef<THREE.DirectionalLight>(null);
 	const ptLight = useRef<THREE.PointLight>(null);
 
 	useFrame(() => {
 		if (theme === "dark" && dirLight.current && ptLight.current) {
-			// Редкие, но сильные скачки напряжения
 			const isSurge = Math.random() > 0.96;
 			const voltage = isSurge ? Math.random() * 15 + 5 : Math.random() * 0.5 + 2;
 			dirLight.current.intensity = THREE.MathUtils.lerp(dirLight.current.intensity, voltage, 0.5);
@@ -225,9 +222,68 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 	);
 }
 
+/**
+ * Adaptive post-processing pipeline — Lusion-grade (Blueprint §FSR + §SMAA)
+ * High: Full pipeline (SMAA HIGH + Bloom + ChromaticAberration + Noise + Vignette)
+ * Mid:  Reduced pipeline (SMAA MEDIUM + Bloom reduced + Vignette)
+ * Low:  Minimal pipeline (SMAA LOW + Vignette only)
+ */
+function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier: DeviceTier }) {
+	const cfg = TIER_CONFIG[tier];
+
+	if (tier === "low") {
+		return (
+			<EffectComposer multisampling={0}>
+				<SMAA preset={cfg.smaa} />
+				<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+			</EffectComposer>
+		);
+	}
+
+	if (tier === "mid") {
+		return (
+			<EffectComposer multisampling={0}>
+				<SMAA preset={cfg.smaa} />
+				<Bloom
+					luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
+					mipmapBlur
+					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
+					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
+				/>
+				<ChromaticAberration
+					blendFunction={BlendFunction.NORMAL}
+					offset={new THREE.Vector2(0.003, 0.003)}
+				/>
+				<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+			</EffectComposer>
+		);
+	}
+
+	// tier === "high" — full pipeline
+	return (
+		<EffectComposer multisampling={0}>
+			<SMAA preset={cfg.smaa} />
+			<Bloom
+				luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
+				mipmapBlur
+				intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
+				blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
+			/>
+			<ChromaticAberration
+				blendFunction={BlendFunction.NORMAL}
+				offset={new THREE.Vector2(0.003, 0.003)}
+			/>
+			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
+			<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+		</EffectComposer>
+	);
+}
+
 export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	const pointerRef = useUnifiedPointer();
 	const paintTextureRef = useRef<THREE.Texture | null>(null);
+	const tier = useDeviceTier();
+	const cfg = TIER_CONFIG[tier];
 
 	const handlePaintTexture = useCallback((tex: THREE.Texture) => {
 		paintTextureRef.current = tex;
@@ -243,7 +299,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				touchAction: "none",
 			}}
 		>
-			<Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 15], fov: 45 }}>
+			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 15], fov: 45 }}>
 				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 				
 				{/* ScreenPaint: Lusion fluid mouse simulation (Blueprint §5) */}
@@ -255,31 +311,19 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				<Stars
 					radius={100}
 					depth={50}
-					count={6000}
+					count={cfg.stars}
 					factor={6}
 					saturation={0}
 					fade
 					speed={3}
 				/>
-				<LiquidNebula theme={theme} />
-				<RefractiveCore />
+				<LiquidNebula theme={theme} particleCount={cfg.particles} />
+				
+				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
+				{tier !== "low" && <RefractiveCore tier={tier} />}
 
-				{/* Lusion Post-Processing: SMAA replaces 4x MSAA (saves ~75% GPU memory) */}
-				<EffectComposer multisampling={0}>
-					<SMAA preset={SMAAPreset.HIGH} />
-					<Bloom
-						luminanceThreshold={theme === "dark" ? 0.2 : 0.8}
-						mipmapBlur
-						intensity={theme === "dark" ? 1.5 : 0.2}
-						blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
-					/>
-					<ChromaticAberration
-						blendFunction={BlendFunction.NORMAL}
-						offset={new THREE.Vector2(0.003, 0.003)}
-					/>
-					<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
-					<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
-				</EffectComposer>
+				{/* Adaptive Post-Processing Pipeline */}
+				<AdaptivePostProcessing theme={theme} tier={tier} />
 			</Canvas>
 		</div>
 	);

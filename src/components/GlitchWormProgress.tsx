@@ -7,6 +7,14 @@ interface GlitchWormProps {
     progress: number; // 0 to 100
 }
 
+/**
+ * GlitchWormProgress — Ingestion progress bar
+ * 
+ * OPTIMIZATION: Replaced 28 × Framer Motion `repeat: Infinity` animations
+ * with a single CSS @keyframes animation. Each Framer Motion instance spawns
+ * its own requestAnimationFrame loop — 28 parallel RAF = 16fps on iPhone.
+ * CSS animations are GPU-composited natively, zero JS overhead.
+ */
 export function GlitchWormProgress({ progress }: GlitchWormProps) {
     const TOTAL_CUBES = 28;
     const safeProgress = Math.max(0, Math.min(100, progress));
@@ -58,29 +66,32 @@ export function GlitchWormProgress({ progress }: GlitchWormProps) {
                                 const isHead = i === filledCount;
                                 
                                 return (
-                                    <motion.div 
+                                    <div 
                                         key={i} 
                                         className={`w-full max-w-[12px] h-4 rounded-[1px] relative overflow-hidden ${
                                             isFilled ? "bg-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.6)]" : "bg-white/5 border border-white/10"
                                         }`}
                                     >
-                                        {/* The Glitch Head Eating Effect */}
+                                        {/* The Glitch Head Eating Effect — CSS animation, not Framer */}
                                         {isHead && (
-                                            <motion.div 
+                                            <div 
                                                 className="absolute inset-0 bg-white"
-                                                animate={{ opacity: [1, 0, 1] }}
-                                                transition={{ duration: 1.0, repeat: Infinity }}
+                                                style={{
+                                                    animation: "wormHeadBlink 1s ease-in-out infinite",
+                                                }}
                                             />
                                         )}
-                                        {/* Tail Pulse */}
+                                        {/* Tail Pulse — CSS animation with staggered delay (was Framer repeat: Infinity) */}
                                         {isFilled && !isHead && (
-                                            <motion.div 
+                                            <div 
                                                 className="absolute inset-0 bg-white/20"
-                                                animate={{ x: ["-100%", "100%"] }}
-                                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: i * 0.05 }}
+                                                style={{
+                                                    animation: "wormShineSweep 1.5s linear infinite",
+                                                    animationDelay: `${i * 0.05}s`,
+                                                }}
                                             />
                                         )}
-                                    </motion.div>
+                                    </div>
                                 );
                             })}
                         </div>
