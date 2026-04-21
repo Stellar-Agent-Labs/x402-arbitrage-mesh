@@ -7,7 +7,6 @@ import {
 	EffectComposer,
 	Noise,
 	SMAA,
-	Vignette,
 } from "@react-three/postprocessing";
 import { SMAAPreset } from "postprocessing";
 import { BlendFunction } from "postprocessing";
@@ -17,6 +16,8 @@ import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
 import RefractiveCore from "./RefractiveCore";
 import ScreenPaint from "./ScreenPaint";
+import LusionFinalPass from "./LusionFinalPass";
+import ScreenPaintDistortion from "./ScreenPaintDistortion";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
@@ -224,18 +225,21 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 
 /**
  * Adaptive post-processing pipeline — Lusion-grade (Blueprint §FSR + §SMAA)
- * High: Full pipeline (SMAA HIGH + Bloom + ChromaticAberration + Noise + Vignette)
- * Mid:  Reduced pipeline (SMAA MEDIUM + Bloom reduced + Vignette)
- * Low:  Minimal pipeline (SMAA LOW + Vignette only)
+ * Pipeline order matches Lusion exactly (строка 49553-49555):
+ *   Scene → SMAA → Bloom → LusionFinalPass(vignette+dither+color) → ScreenPaintDistortion
+ *
+ * High: Full pipeline (SMAA HIGH + Bloom + ChromaticAberration + Noise + LusionFinal + ScreenPaintDistortion)
+ * Mid:  Reduced pipeline (SMAA MEDIUM + Bloom reduced + LusionFinal + ScreenPaintDistortion)
+ * Low:  Minimal pipeline (SMAA LOW + LusionFinal only)
  */
-function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier: DeviceTier }) {
+function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
 	const cfg = TIER_CONFIG[tier];
 
 	if (tier === "low") {
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+				<LusionFinalPass theme={theme} />
 			</EffectComposer>
 		);
 	}
@@ -254,12 +258,13 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
 				/>
-				<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+				<LusionFinalPass theme={theme} />
+				<ScreenPaintDistortion paintTexture={paintTexture} />
 			</EffectComposer>
 		);
 	}
 
-	// tier === "high" — full pipeline
+	// tier === "high" — full Lusion pipeline
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
@@ -274,7 +279,8 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 				offset={new THREE.Vector2(0.003, 0.003)}
 			/>
 			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
-			<Vignette eskil={false} offset={0.1} darkness={theme === "dark" ? 1.1 : 0.5} />
+			<LusionFinalPass theme={theme} />
+			<ScreenPaintDistortion paintTexture={paintTexture} />
 		</EffectComposer>
 	);
 }
@@ -322,8 +328,8 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
 				{tier !== "low" && <RefractiveCore tier={tier} />}
 
-				{/* Adaptive Post-Processing Pipeline */}
-				<AdaptivePostProcessing theme={theme} tier={tier} />
+				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
+				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTextureRef.current} />
 			</Canvas>
 		</div>
 	);
