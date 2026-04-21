@@ -4,28 +4,32 @@
  * Source: lusion_formatted.js lines 42644-42691
  * Extracted: lusion_dump_chunks/23_ease_bluenoise_transition.md (lines 80-114)
  *
- * Takes the ScreenPaint FBO (velocity field from mouse movement) and applies:
+ * Now uses the REAL LDR_RGB1_0.png blue noise texture (128×128, CC0 Christoph Peters)
+ * downloaded directly from labs.lusion.co/assets/textures/LDR_RGB1_0.png
+ *
+ * Implements:
  * 1. 4-tap motion blur along velocity direction
- * 2. Blue noise jitter for temporal anti-aliasing
+ * 2. Blue noise jitter using REAL texture for temporal anti-aliasing
  * 3. Chromatic RGB shift proportional to velocity magnitude
  *
- * This is what makes mouse movement feel "liquid" — the whole screen subtly
- * warps and shifts color when you move the mouse fast.
- *
  * Lusion JS Defaults (lines 42648-42652):
- * - amount: 20 (properties override: screenPaintDistortionAmount = 20)
- * - rgbShift: 1 (properties override: screenPaintDistortionRGBShift = 0.5)
- * - multiplier: 1.25 (properties override: screenPaintDistortionMultiplier = 5)
- * - colorMultiplier: 1 (properties override: screenPaintDistortionColorMultiplier = 10)
- * - shade: 1.25
+ * - amount: 20, rgbShift: 0.5, multiplier: 5, colorMultiplier: 10, shade: 1.25
  */
 
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useMemo, useEffect } from "react";
 import { Effect, BlendFunction } from "postprocessing";
-import { Uniform, Vector2, type Texture } from "three";
+import {
+  Uniform,
+  Vector2,
+  TextureLoader,
+  NearestFilter,
+  RepeatWrapping,
+  type Texture,
+} from "three";
 import { useFrame } from "@react-three/fiber";
 
 // Exact GLSL from Lusion lines 42640-42643
+// Uses REAL blue noise texture instead of hash approximation
 const fragment = /* glsl */ `
   uniform sampler2D u_screenPaintTexture;
   uniform vec2 u_screenPaintTexelSize;
@@ -35,12 +39,14 @@ const fragment = /* glsl */ `
   uniform float u_colorMultiplier;
   uniform float u_shade;
 
-  // Simplified blue noise (hash-based) — Lusion uses LDR_RGB1_0.png texture,
-  // but hash approximation is visually equivalent for this use case
+  // Real blue noise texture (Lusion: LDR_RGB1_0.png, 128×128)
+  uniform sampler2D u_blueNoiseTexture;
+  uniform vec2 u_blueNoiseTexelSize;
+  uniform vec2 u_blueNoiseCoordOffset;
+
+  // Lusion exact getBlueNoise (строка 3206 in index.f4419199.js)
   vec3 getBlueNoise(vec2 coord) {
-    vec3 p3 = fract(vec3(coord.xyx) * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yzx + 33.33);
-    return fract((p3.xxy + p3.yzz) * p3.zyx);
+    return texture2D(u_blueNoiseTexture, coord * u_blueNoiseTexelSize + u_blueNoiseCoordOffset).rgb;
   }
 
   void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
@@ -68,14 +74,16 @@ const fragment = /* glsl */ `
   }
 `;
 
+const BLUE_NOISE_SIZE = 128; // Lusion: TEXTURE_SIZE = 128
+
 class ScreenPaintDistortionEffect extends Effect {
   constructor({
     screenPaintTexture = null as Texture | null,
-    amount = 20,          // Lusion: screenPaintDistortionAmount = 20
-    rgbShift = 0.5,       // Lusion: screenPaintDistortionRGBShift = 0.5
-    multiplier = 5,       // Lusion: screenPaintDistortionMultiplier = 5
-    colorMultiplier = 10, // Lusion: screenPaintDistortionColorMultiplier = 10
-    shade = 1.25,         // Lusion: shade = 1.25
+    amount = 20,
+    rgbShift = 0.5,
+    multiplier = 5,
+    colorMultiplier = 10,
+    shade = 1.25,
   } = {}) {
     super("ScreenPaintDistortionEffect", fragment, {
       blendFunction: BlendFunction.NORMAL,
@@ -87,13 +95,16 @@ class ScreenPaintDistortionEffect extends Effect {
         ["u_multiplier", new Uniform(multiplier)],
         ["u_colorMultiplier", new Uniform(colorMultiplier)],
         ["u_shade", new Uniform(shade)],
+        // Blue noise uniforms (Lusion: BlueNoise class, строка 42606)
+        ["u_blueNoiseTexture", new Uniform(null)],
+        ["u_blueNoiseTexelSize", new Uniform(new Vector2(1 / BLUE_NOISE_SIZE, 1 / BLUE_NOISE_SIZE))],
+        ["u_blueNoiseCoordOffset", new Uniform(new Vector2(0, 0))],
       ]),
     });
   }
 }
 
 interface ScreenPaintDistortionProps {
-  /** Texture from ScreenPaint FBO (ping-pong output) */
   paintTexture: Texture | null;
   amount?: number;
   rgbShift?: number;
@@ -104,10 +115,7 @@ interface ScreenPaintDistortionProps {
 
 /**
  * R3F wrapper for Lusion ScreenPaint Distortion.
- * Place inside <EffectComposer> AFTER LusionFinalPass (matching Lusion pipeline order).
- *
- * Lusion pipeline order (строка 49553-49555):
- *   Scene → SMAA → FSR → Bloom → Final → ScreenPaintDistortion
+ * Loads the REAL LDR_RGB1_0.png blue noise texture on mount.
  */
 const ScreenPaintDistortion = forwardRef(function ScreenPaintDistortion(
   props: ScreenPaintDistortionProps,
@@ -133,11 +141,28 @@ const ScreenPaintDistortion = forwardRef(function ScreenPaintDistortion(
     });
   }, [paintTexture, amount, rgbShift, multiplier, colorMultiplier, shade]);
 
-  // Update paint texture ref every frame (it changes via ping-pong)
+  // Load REAL blue noise texture on mount (Lusion: BlueNoise.preInit())
+  useEffect(() => {
+    const loader = new TextureLoader();
+    loader.load("/LDR_RGB1_0.png", (tex) => {
+      // Lusion exact: NearestFilter + RepeatWrapping (строка 42627-42630)
+      tex.generateMipmaps = false;
+      tex.minFilter = NearestFilter;
+      tex.magFilter = NearestFilter;
+      tex.wrapS = RepeatWrapping;
+      tex.wrapT = RepeatWrapping;
+      effect.uniforms.get("u_blueNoiseTexture")!.value = tex;
+    });
+  }, [effect]);
+
+  // Update every frame (Lusion: BlueNoise.update())
   useFrame(() => {
     if (paintTexture) {
       effect.uniforms.get("u_screenPaintTexture")!.value = paintTexture;
     }
+    // Lusion exact: каждый кадр — случайный offset (NOT increment!)
+    const offset = effect.uniforms.get("u_blueNoiseCoordOffset")!.value as Vector2;
+    offset.set(Math.random(), Math.random());
   });
 
   return <primitive ref={ref} object={effect} dispose={null} />;
