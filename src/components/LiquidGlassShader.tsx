@@ -258,7 +258,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					intensity={theme === "dark" ? cfg.bloomIntensity : 0.2}
 					blendFunction={theme === "dark" ? BlendFunction.ADD : BlendFunction.MULTIPLY}
 				/>
-				<LensHaloPass />
+				{/* LensHaloPass disabled — creates center overexposure on our scene */}
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.003, 0.003)}
