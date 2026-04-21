@@ -61,7 +61,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				transformOrigin: "center bottom",
 				// Masonry/Bento logic: Full width for 0, 3, and 6
 				gridColumn: index === 0 || index === 3 || index === 6 ? "1 / -1" : "auto",
-				padding: "3rem",
+				padding: "clamp(1.5rem, 3vw, 3rem)",
 				background: hovered 
 					? (theme === "dark" ? "rgba(0,15,0,0.35)" : "rgba(240,255,245,0.6)")
 					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.45)"),
@@ -81,6 +81,10 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 						: "none",
                 minHeight: index === 0 || index === 3 || index === 6 ? "240px" : "320px",
                 justifyContent: "space-between",
+				overflow: "hidden",
+				wordBreak: "break-word" as const,
+				maxWidth: "100%",
+				boxSizing: "border-box" as const,
 				// For the snake border pseudo-element to render correctly
 				position: "relative"
 			}}
@@ -273,10 +277,11 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				style={{
 					display: "grid",
                     // Bento grid: adaptive auto-fit
-					gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+					gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
 					gridAutoRows: "minmax(280px, auto)",
-					gap: "clamp(1.5rem, 4vw, 3.5rem)",
+					gap: "clamp(1rem, 3vw, 3.5rem)",
 					paddingBottom: "3rem",
+					overflow: "hidden",
                     perspective: "1200px" // Required for the Lusion 3D tilt interaction
 				}}
 			>
