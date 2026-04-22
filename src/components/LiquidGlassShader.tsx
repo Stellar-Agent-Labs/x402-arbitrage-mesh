@@ -325,8 +325,10 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
 				{tier !== "low" && <RefractiveCore tier={tier} />}
 
-				{/* Lusion BrownianMotion camera shake — ultra-slow for Apple-smooth feel */}
-				<BrownianMotionCamera positionSpeed={0.02} rotationSpeed={0.05} />
+				{/* BrownianMotionCamera permanently disabled:
+				    Camera rotation causes parallax between HTML DOM text and 3D objects.
+				    No amount of position tracking can fix rotation-induced drift.
+				    Particles + stars already provide enough ambient motion. */}
 
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
 				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTexture} />

@@ -33,10 +33,6 @@ export default function RefractiveCore({ tier = "high" }: { tier?: DeviceTier })
 		if (meshRef.current) {
 			meshRef.current.rotation.x = state.clock.elapsedTime * 0.15;
 			meshRef.current.rotation.y = state.clock.elapsedTime * 0.25;
-			// Lock to camera: keep sphere 15 units in front, +1.5 above camera center
-			// This prevents parallax between HTML DOM overlay (text) and 3D sphere
-			const cam = state.camera.position;
-			meshRef.current.position.set(cam.x, cam.y + 1.5, cam.z - 15);
 		}
 	});
 
