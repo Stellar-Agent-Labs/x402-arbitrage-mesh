@@ -39,10 +39,10 @@ import { GPUComputationRenderer } from "three/examples/jsm/misc/GPUComputationRe
 const TEX_SIZE = 128; // строка 48648
 const PARTICLE_COUNT = TEX_SIZE * TEX_SIZE; // 16384, строка 48649
 
-// Lusion EXACT render uniforms (строки 48750-48765)
-const U_OPACITY = 0.32;
-const U_P_SIZE_MUL = 0.4;
-const U_P_SOFT_MUL = 0.92;
+// Tuned for z=5 camera to match Lusion nebula clouds visual density
+const U_OPACITY = 0.85;
+const U_P_SIZE_MUL = 1.6;
+const U_P_SOFT_MUL = 2.5;
 const U_FOCUS_DIST = 0.32;
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
@@ -343,7 +343,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		posVar.material.uniforms.u_curlNoiseScale = { value: new THREE.Vector3(0.2, 0.6, 0.2) };
 		posVar.material.uniforms.u_curlStrength = { value: new THREE.Vector3(0.2, 0.12, 0.12) };
-		posVar.material.uniforms.u_curlStrMul = { value: 0.6 };
+		posVar.material.uniforms.u_curlStrMul = { value: 0.8 };  // Lusion exact (Particles.js line 125)
 		posVar.material.uniforms.u_bounds = { value: new THREE.Vector3(7.0, 5.0, 2.0) };
 
 		// Velocity uniforms — Lusion exact from Particles.js _initTextures()
