@@ -6,7 +6,6 @@ import {
 	Bloom,
 	ChromaticAberration,
 	EffectComposer,
-	Noise,
 	SMAA,
 } from "@react-three/postprocessing";
 import { SMAAPreset } from "postprocessing";
@@ -67,7 +66,7 @@ const vertexShader = `
     // pSize scaled for our camera z=15 (Lusion at z≈5, so /3 compensation)
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
-    float pSize = (coef * 200.0 * 0.06) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+    float pSize = (coef * 200.0 * 0.008) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
     gl_PointSize = max(1.5, pSize);
 
     // Lusion-exact softness
