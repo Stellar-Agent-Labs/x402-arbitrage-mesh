@@ -208,7 +208,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
 				<FsrRcasPass sharpness={1.0} />
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			</EffectComposer>
 		);
 	}
@@ -224,7 +224,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 			</EffectComposer>
 		);
@@ -243,7 +243,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 			/>
 			{/* Noise REMOVED — was adding grainy film grain overlay. Lusion uses
 		    1-bit dithering in final pass (already in LusionFinalPass), NOT noise overlay */}
-			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
+			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 		</EffectComposer>
 	);
