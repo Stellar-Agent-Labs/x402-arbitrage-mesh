@@ -333,8 +333,11 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const err = gpu.init();
 		if (err !== null) {
 			console.error("GPUComputationRenderer init error:", err);
+			gpu.dispose();
+			return;
 		}
 
+		console.log("GPGPU initialized: 128x128 FBO, curl noise + velocity physics");
 		gpuRef.current = gpu;
 		posVarRef.current = posVar;
 		velVarRef.current = velVar;
@@ -407,6 +410,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 				depthWrite={false}
 				depthTest={false}
 				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
+				extensions-derivatives={true}
 			/>
 		</points>
 	);
