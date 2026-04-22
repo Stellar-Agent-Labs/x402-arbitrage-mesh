@@ -126,11 +126,11 @@ const vertexShader = `
     // Zonal brightness: center 50% always bright + pulsates, edges fade
     float distFromCenter = length(newPos.xy) / 10.0;
     float isCenter = 1.0 - smoothstep(0.3, 0.7, distFromCenter); // 1.0 in center, 0.0 at edges
-    // Center particles: always bright + gentle pulse (never dim)
-    float pulse = 0.85 + 0.15 * sin(uTime * 0.8 + aRandom.x * 6.28);
+    // Center particles: always full brightness, NO pulsation
+    float centerBright = 1.0;
     // Edge particles: gradual fade to 30%
     float edgeFade = 0.3 + 0.7 * (1.0 - smoothstep(0.5, 1.2, distFromCenter));
-    float zonalOpacity = mix(edgeFade, pulse, isCenter);
+    float zonalOpacity = mix(edgeFade, centerBright, isCenter);
     float opacityBase = ${U_OPACITY} * zonalOpacity;
     vOpacity = opacityBase * (0.7 + aRandom.w * 0.3); // per-particle: 70%-100%
   }
