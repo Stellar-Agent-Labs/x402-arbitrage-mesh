@@ -26,9 +26,9 @@ import LensHaloPass from "./LensHaloPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
-	high: { particles: 8000, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
-	mid:  { particles: 4000, smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
-	low:  { particles: 2000, smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
+	high: { particles: 16384, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
+	mid:  { particles: 8192,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
+	low:  { particles: 4096,  smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
 };
 
 // Lusion-grade softness constants (from Blueprint §3, строка 48763)
@@ -46,23 +46,24 @@ const vertexShader = `
 
   void main() {
     vColor = customColor;
-    // Positions are CPU-animated — no GPU drift needed
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mvPosition;
-    float baseSize = max(2.5, (55.0 / -mvPosition.z));
-    gl_PointSize = baseSize * max(0.5, (uResolution.y / 1280.0));
 
-    // Depth-aware softness (Lusion Blueprint §3)
+    // Lusion-exact pSize formula (строка 48602):
+    // pSize = (coef * 200.0 * u_pSizeMul) / -mvPosition.z * resolution.y / 1280
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
+    float pSize = (coef * 200.0 * 0.4) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+    gl_PointSize = max(1.5, pSize);
+
+    // Lusion-exact softness
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
 
-    // Zonal brightness: center always bright, edges fade
-    float distFromCenter = length(position.xy) / 12.0;
-    float isCenter = 1.0 - smoothstep(0.3, 0.7, distFromCenter);
-    float edgeFade = 0.3 + 0.7 * (1.0 - smoothstep(0.5, 1.2, distFromCenter));
-    float zonalOpacity = mix(edgeFade, 1.0, isCenter);
-    vOpacity = ${U_OPACITY} * zonalOpacity;
+    // Zonal brightness: center=full, edges fade
+    float distFromCenter = length(position.xy) / 5.0;
+    float isCenter = 1.0 - smoothstep(0.2, 0.6, distFromCenter);
+    float edgeFade = 0.35 + 0.65 * (1.0 - smoothstep(0.4, 1.0, distFromCenter));
+    vOpacity = ${U_OPACITY} * mix(edgeFade, 1.0, isCenter);
   }
 `;
 
@@ -70,7 +71,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const pointsRef = useRef<THREE.Points>(null);
 	const { size } = useThree();
 
-	// Store base positions + random params ONCE
+	// Store base positions + random params ONCE, Lusion-exact spawn bounds
 	const [[basePositions, positions, colors, randoms]] = useState(() => {
 		const base = new Float32Array(particleCount * 3);
 		const pos = new Float32Array(particleCount * 3);
@@ -79,15 +80,15 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		for (let i = 0; i < particleCount; i++) {
-			const theta = Math.random() * 2 * Math.PI;
-			const v = Math.random();
-			const phi = Math.acos(2 * v - 1);
-			const r = 10 * Math.random() ** 0.5;
+		// Lusion-exact spawn bounds (строка 48653):
+		// bounds: {x:4, y:2.4, z:0.64}, offset: {x:-3, y:-0.5, z:0}
+		const BOUNDS = { x: 4, y: 2.4, z: 0.64 };
+		const OFFSET = { x: -3, y: -0.5, z: 0 };
 
-			const x = r * Math.sin(phi) * Math.cos(theta);
-			const y = r * Math.sin(phi) * Math.sin(theta);
-			const z = r * Math.cos(phi);
+		for (let i = 0; i < particleCount; i++) {
+			const x = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
+			const y = (Math.random() - 0.5) * 2 * BOUNDS.y + OFFSET.y;
+			const z = (Math.random() - 0.5) * 2 * BOUNDS.z + OFFSET.z;
 
 			base[i * 3] = x;
 			base[i * 3 + 1] = y;
@@ -101,10 +102,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			col[i * 3 + 1] = c.g;
 			col[i * 3 + 2] = c.b;
 
-			rnd[i * 4] = Math.random() * 6.2832;     // unique phase (0-2π)
-			rnd[i * 4 + 1] = 0.15 + Math.random() * 0.35; // unique speed (0.15-0.50)
-			rnd[i * 4 + 2] = 1.5 + Math.random() * 3.0;   // orbit radius (1.5-4.5)
-			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;   // opacity mul (0.7-1.0)
+			rnd[i * 4] = Math.random() * 6.2832;               // phase (0-2π)
+			rnd[i * 4 + 1] = 0.08 + Math.random() * 0.20;      // speed (0.08-0.28) — Lusion curlStr range
+			rnd[i * 4 + 2] = 0.3 + Math.random() * 0.8;        // orbit radius (0.3-1.1) — within Lusion bounds
+			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;        // opacity mul (0.7-1.0)
 		}
 		return [base, pos, col, rnd];
 	});
