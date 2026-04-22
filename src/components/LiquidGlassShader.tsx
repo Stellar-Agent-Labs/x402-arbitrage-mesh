@@ -40,7 +40,7 @@ const TEX_SIZE = 128; // строка 48648
 const PARTICLE_COUNT = TEX_SIZE * TEX_SIZE; // 16384, строка 48649
 
 // Render: boosted to compensate for missing Bloom postprocessing (physics remain 1:1)
-const U_OPACITY = "0.85";
+const U_OPACITY = "0.95";
 const U_P_SIZE_MUL = "1.6";
 const U_P_SOFT_MUL = "2.5";
 const U_FOCUS_DIST = "0.32";
@@ -48,7 +48,7 @@ const U_FOCUS_DIST = "0.32";
 // Lusion EXACT spawn/kill (строки 48653-48664)
 // NOTE: Use strings with decimals for GLSL (JS integers break shader compilation)
 const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
-const SPAWN_OX = "0.0"; const SPAWN_OY = "0.0"; const SPAWN_OZ = "0.0";
+const SPAWN_OX = "-3.0"; const SPAWN_OY = "-0.5"; const SPAWN_OZ = "0.0";  // Lusion EXACT offset (11_key_constants line 16)
 const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
 
 // ── Exact Lusion GLSL: Simplex 4D Derivatives + Curl (from 01_particle_position_shader.glsl) ──
