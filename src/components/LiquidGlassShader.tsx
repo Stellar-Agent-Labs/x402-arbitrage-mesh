@@ -39,10 +39,10 @@ import { GPUComputationRenderer } from "three/examples/jsm/misc/GPUComputationRe
 const TEX_SIZE = 128; // строка 48648
 const PARTICLE_COUNT = TEX_SIZE * TEX_SIZE; // 16384, строка 48649
 
-// Lusion EXACT render uniforms (Particles.js lines 82-96) — strings for GLSL safety
-const U_OPACITY = "0.32";
-const U_P_SIZE_MUL = "0.4";
-const U_P_SOFT_MUL = "0.92";
+// Render: boosted to compensate for missing Bloom postprocessing (physics remain 1:1)
+const U_OPACITY = "0.85";
+const U_P_SIZE_MUL = "1.6";
+const U_P_SOFT_MUL = "2.5";
 const U_FOCUS_DIST = "0.32";
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
