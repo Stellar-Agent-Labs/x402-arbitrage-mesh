@@ -46,9 +46,10 @@ const U_P_SOFT_MUL = 0.92;
 const U_FOCUS_DIST = 0.32;
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
-const SPAWN = { x: 4.0, y: 2.4, z: 0.64 };
-const SPAWN_OFFSET = { x: 0.0, y: 0.0, z: 0.0 }; // centered for our viewport
-const KILL = { x: 7.0, y: 5.0, z: 2.0 };
+// NOTE: Use strings with decimals for GLSL (JS integers break shader compilation)
+const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
+const SPAWN_OX = "0.0"; const SPAWN_OY = "0.0"; const SPAWN_OZ = "0.0";
+const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
 
 // ── Simplex 4D noise + Curl (from Lusion dump line 48606) ──
 const NOISE_GLSL = /* glsl */ `
@@ -164,18 +165,18 @@ void main() {
   
   // Kill bounds check (строка 48664)
   bool dead = posLife.w >= 1.0 ||
-    abs(posLife.x) > ${KILL.x} ||
-    abs(posLife.y) > ${KILL.y} ||
-    abs(posLife.z) > ${KILL.z};
+    abs(posLife.x) > ${KILL_X} ||
+    abs(posLife.y) > ${KILL_Y} ||
+    abs(posLife.z) > ${KILL_Z};
     
   if (dead) {
     // Respawn in spawn bounds (строка 48653)
     float r1 = fract(sin(dot(uv + u_time, vec2(12.9898, 78.233))) * 43758.5453);
     float r2 = fract(sin(dot(uv + u_time, vec2(63.7264, 10.873))) * 43758.5453);
     float r3 = fract(sin(dot(uv + u_time, vec2(36.7539, 50.3658))) * 43758.5453);
-    posLife.x = (r1 - 0.5) * 2.0 * ${SPAWN.x} + ${SPAWN_OFFSET.x};
-    posLife.y = (r2 - 0.5) * 2.0 * ${SPAWN.y} + ${SPAWN_OFFSET.y};
-    posLife.z = (r3 - 0.5) * 2.0 * ${SPAWN.z} + ${SPAWN_OFFSET.z};
+    posLife.x = (r1 - 0.5) * 2.0 * ${SPAWN_X} + ${SPAWN_OX};
+    posLife.y = (r2 - 0.5) * 2.0 * ${SPAWN_Y} + ${SPAWN_OY};
+    posLife.z = (r3 - 0.5) * 2.0 * ${SPAWN_Z} + ${SPAWN_OZ};
     posLife.w = 0.0;
     gl_FragColor = posLife;
     return;
@@ -294,9 +295,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const posTex = gpu.createTexture();
 		const posData = posTex.image.data as Float32Array;
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			posData[i * 4]     = (Math.random() - 0.5) * 2 * SPAWN.x + SPAWN_OFFSET.x;
-			posData[i * 4 + 1] = (Math.random() - 0.5) * 2 * SPAWN.y + SPAWN_OFFSET.y;
-			posData[i * 4 + 2] = (Math.random() - 0.5) * 2 * SPAWN.z + SPAWN_OFFSET.z;
+			posData[i * 4]     = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
+			posData[i * 4 + 1] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
+			posData[i * 4 + 2] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
 			posData[i * 4 + 3] = Math.random(); // stagger life so not all die at once
 		}
 
