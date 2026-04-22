@@ -39,10 +39,10 @@ import { GPUComputationRenderer } from "three/examples/jsm/misc/GPUComputationRe
 const TEX_SIZE = 128; // строка 48648
 const PARTICLE_COUNT = TEX_SIZE * TEX_SIZE; // 16384, строка 48649
 
-// Tuned for z=5 camera — green nebula particles (user preferred)
-const U_OPACITY = "0.85";
-const U_P_SIZE_MUL = "1.6";
-const U_P_SOFT_MUL = "2.5";
+// Lusion EXACT render uniforms (Particles.js lines 82-96) — strings for GLSL safety
+const U_OPACITY = "0.32";
+const U_P_SIZE_MUL = "0.4";
+const U_P_SOFT_MUL = "0.92";
 const U_FOCUS_DIST = "0.32";
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
@@ -311,10 +311,12 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const posTex = gpu.createTexture();
 		const posData = posTex.image.data as Float32Array;
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			posData[i * 4]     = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
-			posData[i * 4 + 1] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
-			posData[i * 4 + 2] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
-			posData[i * 4 + 3] = Math.random(); // stagger life (1.0→0.0)
+			// Lusion EXACT spawn (line 219): pow(rand,4) for X clusters to center
+			posData[i * 4]     = (Math.pow(Math.random(), 4) * 2 - 1) * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
+			posData[i * 4 + 1] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
+			posData[i * 4 + 2] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
+			// Lusion EXACT life init (line 111): linear i/N, not random
+			posData[i * 4 + 3] = i / PARTICLE_COUNT;
 		}
 
 		// Default position texture for respawn (Lusion exact: texture2D(u_defaultPosTex, uv))
@@ -351,7 +353,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_time = { value: 0 };
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
-		velVar.material.uniforms.u_windStrMul = { value: 1.2 };
+		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
 
 		// Wrapping for seamless noise
 		posVar.wrapS = THREE.RepeatWrapping;
