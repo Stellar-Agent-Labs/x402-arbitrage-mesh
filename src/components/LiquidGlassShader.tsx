@@ -33,7 +33,7 @@ const TIER_CONFIG = {
 // Lusion-grade softness constants (from Blueprint §3, строка 48763)
 const U_FOCUS_DIST = 0.32;
 const U_P_SOFT_MUL = 0.92;
-const U_OPACITY = 0.55; // increased from Lusion 0.32 — our particles need more brightness at z=15
+const U_OPACITY = 0.32; // Lusion exact (строка 48751)
 
 const vertexShader = `
   uniform float uTime;
@@ -63,20 +63,17 @@ const vertexShader = `
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Simple distance-based size (Lusion pow(2.5) explodes at z=15)
-    float baseSize = 55.0 / max(0.1, -mvPosition.z);
-    gl_PointSize = max(2.0, baseSize * uResolution.y / 1080.0);
+    // Lusion EXACT pSize (строка 48602, dump verified)
+    float focusDist = ${U_FOCUS_DIST} * 10.0;
+    float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
+    float pSize = (coef * 200.0 * 0.4) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+    gl_PointSize = max(1.0, pSize);
 
-    // Softness — linear only (no pow explosion)
-    float focusDist = 12.0;
-    float dz = abs(-mvPosition.z - focusDist);
-    vSoftness = dz * 0.3 * ${U_P_SOFT_MUL};
+    // Lusion EXACT softness (строка 48759)
+    vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
 
-    // Zonal brightness: center=full, edges fade
-    float distFromCenter = length(pos.xy) / 14.0;
-    float isCenter = 1.0 - smoothstep(0.2, 0.6, distFromCenter);
-    float edgeFade = 0.35 + 0.65 * (1.0 - smoothstep(0.4, 1.0, distFromCenter));
-    vOpacity = 0.65 * mix(edgeFade, 1.0, isCenter) * aRandom.w;
+    // Lusion EXACT opacity (строка 48751)
+    vOpacity = ${U_OPACITY} * aRandom.w;
   }
 `;
 
@@ -92,9 +89,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		// Lusion bounds ×3 for our camera z=15 (Lusion z≈5)
-		const BOUNDS = { x: 12, y: 7.2, z: 1.92 };
-		const OFFSET = { x: 0, y: 0, z: 0 }; // centered for our scene
+		// Lusion EXACT spawn bounds (строка 48653, dump verified)
+		const BOUNDS = { x: 4, y: 2.4, z: 0.64 };
+		const OFFSET = { x: -3, y: -0.5, z: 0 };
 
 		for (let i = 0; i < particleCount; i++) {
 			pos[i * 3]     = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
@@ -108,7 +105,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 			rnd[i * 4]     = Math.random() * 6.2832;          // phase (0-2π)
 			rnd[i * 4 + 1] = 0.08 + Math.random() * 0.20;     // speed
-			rnd[i * 4 + 2] = 0.8 + Math.random() * 2.5;       // orbit radius (scaled for z=15 bounds)
+			rnd[i * 4 + 2] = 0.3 + Math.random() * 0.8;       // orbit radius (within Lusion bounds)
 			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;       // opacity mul
 		}
 		return [pos, col, rnd];
@@ -280,7 +277,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				touchAction: "none",
 			}}
 		>
-			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 15], fov: 45 }}>
+			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 45 }}>
 				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 				
 				{/* ScreenPaint: Lusion fluid mouse simulation (Blueprint §5) */}
