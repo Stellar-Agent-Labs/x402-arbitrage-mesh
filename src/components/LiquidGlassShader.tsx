@@ -33,7 +33,7 @@ const TIER_CONFIG = {
 // Lusion-grade softness constants (from Blueprint §3, строка 48763)
 const U_FOCUS_DIST = 0.32;
 const U_P_SOFT_MUL = 0.92;
-const U_OPACITY = 0.32;
+const U_OPACITY = 0.55; // increased from Lusion 0.32 — our particles need more brightness at z=15
 
 const vertexShader = `
   uniform float uTime;
@@ -66,8 +66,8 @@ const vertexShader = `
     // pSize scaled for our camera z=15 (Lusion at z≈5, so /3 compensation)
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
-    float pSize = (coef * 200.0 * 0.008) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
-    gl_PointSize = max(1.5, pSize);
+    float pSize = (coef * 200.0 * 0.04) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+    gl_PointSize = max(2.0, pSize);
 
     // Lusion-exact softness
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
