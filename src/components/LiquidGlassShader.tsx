@@ -94,20 +94,26 @@ const vertexShader = `
     vec3 pos = position;
     
     // Per-particle unique phase & speed from aRandom attribute
-    float uniquePhase = aRandom.x * 100.0;  // large spread avoids sync
-    float uniqueSpeed = 0.08 + aRandom.y * 0.14; // 0.08-0.22 range (FAST)
-    float orbitRadius = 2.0 + aRandom.z * 4.0;  // 2.0-6.0 drift amplitude (BIG)
+    float uniquePhase = aRandom.x * 6.2832; // full circle phase spread
+    float uniqueSpeed = 0.15 + aRandom.y * 0.35; // 0.15-0.50 rad/s (VISIBLE)
+    float orbitRadius = 1.5 + aRandom.z * 3.0;  // 1.5-4.5 units drift
     
-    float phase = uTime * uniqueSpeed + uniquePhase;
-    float n1 = snoise(pos * 0.15 + phase) * orbitRadius; 
-    float n2 = snoise(pos.yzx * 0.15 + phase + 10.0) * orbitRadius;
-    float n3 = snoise(pos.zxy * 0.15 + phase + 20.0) * orbitRadius * 0.3; // Z drift smaller
+    // PRIMARY: Sinusoidal orbital motion — clear, visible elliptical drift
+    float t = uTime * uniqueSpeed + uniquePhase;
+    float n1 = sin(t) * orbitRadius;
+    float n2 = cos(t * 1.3 + uniquePhase * 2.0) * orbitRadius * 0.7;
+    float n3 = sin(t * 0.7 + uniquePhase * 3.0) * orbitRadius * 0.15; // Z: subtle
+    
+    // SECONDARY: Thin noise layer for organic irregularity
+    float noisePhase = uTime * 0.04 + aRandom.x * 50.0;
+    n1 += snoise(pos * 0.2 + noisePhase) * 0.6;
+    n2 += snoise(pos.yzx * 0.2 + noisePhase + 10.0) * 0.6;
     
     // Rare surge: ~8% of particles get periodic large displacement
     float surge = snoise(vec3(aRandom.x * 50.0, uTime * 0.05, 0.0));
-    float surgeGate = step(0.78, surge); // activates more often
-    n1 += surgeGate * snoise(pos * 0.08 + uTime * 0.15) * 5.0;
-    n2 += surgeGate * snoise(pos.yzx * 0.08 + uTime * 0.15) * 4.0;
+    float surgeGate = step(0.78, surge);
+    n1 += surgeGate * 3.0;
+    n2 += surgeGate * 2.5;
     
     vec3 newPos = pos + vec3(n1, n2, n3);
     
