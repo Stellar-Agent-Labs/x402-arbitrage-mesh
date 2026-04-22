@@ -95,19 +95,19 @@ const vertexShader = `
     
     // Per-particle unique phase & speed from aRandom attribute
     float uniquePhase = aRandom.x * 100.0;  // large spread avoids sync
-    float uniqueSpeed = 0.06 + aRandom.y * 0.08; // 0.06-0.14 range
-    float orbitRadius = 0.5 + aRandom.z * 1.0;  // 0.5-1.5 drift amplitude
+    float uniqueSpeed = 0.08 + aRandom.y * 0.14; // 0.08-0.22 range (FAST)
+    float orbitRadius = 2.0 + aRandom.z * 4.0;  // 2.0-6.0 drift amplitude (BIG)
     
     float phase = uTime * uniqueSpeed + uniquePhase;
-    float n1 = snoise(pos * 0.25 + phase) * orbitRadius; 
-    float n2 = snoise(pos.yzx * 0.25 + phase + 10.0) * orbitRadius;
-    float n3 = snoise(pos.zxy * 0.25 + phase + 20.0) * orbitRadius;
+    float n1 = snoise(pos * 0.15 + phase) * orbitRadius; 
+    float n2 = snoise(pos.yzx * 0.15 + phase + 10.0) * orbitRadius;
+    float n3 = snoise(pos.zxy * 0.15 + phase + 20.0) * orbitRadius * 0.3; // Z drift smaller
     
-    // Rare surge: ~5% of particles get occasional large displacement
-    float surge = snoise(vec3(aRandom.x * 50.0, uTime * 0.03, 0.0));
-    float surgeGate = step(0.85, surge); // only activates above 0.85
-    n1 += surgeGate * snoise(pos * 0.1 + uTime * 0.2) * 2.0;
-    n2 += surgeGate * snoise(pos.yzx * 0.1 + uTime * 0.2) * 1.5;
+    // Rare surge: ~8% of particles get periodic large displacement
+    float surge = snoise(vec3(aRandom.x * 50.0, uTime * 0.05, 0.0));
+    float surgeGate = step(0.78, surge); // activates more often
+    n1 += surgeGate * snoise(pos * 0.08 + uTime * 0.15) * 5.0;
+    n2 += surgeGate * snoise(pos.yzx * 0.08 + uTime * 0.15) * 4.0;
     
     vec3 newPos = pos + vec3(n1, n2, n3);
     
@@ -123,11 +123,16 @@ const vertexShader = `
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
     
-    // Zonal brightness: center=bright, edges=dim + per-particle variation
-    float distFromCenter = length(newPos.xy) / 10.0; // normalize to 0-1
-    float zonalFade = 1.0 - smoothstep(0.2, 1.0, distFromCenter); // bright center, dim edges
-    float opacityBase = ${U_OPACITY} * (0.5 + zonalFade * 0.5); // 50%-100% range
-    vOpacity = opacityBase * (0.6 + aRandom.w * 0.4); // per-particle: 60%-100% of zonal
+    // Zonal brightness: center 50% always bright + pulsates, edges fade
+    float distFromCenter = length(newPos.xy) / 10.0;
+    float isCenter = 1.0 - smoothstep(0.3, 0.7, distFromCenter); // 1.0 in center, 0.0 at edges
+    // Center particles: always bright + gentle pulse (never dim)
+    float pulse = 0.85 + 0.15 * sin(uTime * 0.8 + aRandom.x * 6.28);
+    // Edge particles: gradual fade to 30%
+    float edgeFade = 0.3 + 0.7 * (1.0 - smoothstep(0.5, 1.2, distFromCenter));
+    float zonalOpacity = mix(edgeFade, pulse, isCenter);
+    float opacityBase = ${U_OPACITY} * zonalOpacity;
+    vOpacity = opacityBase * (0.7 + aRandom.w * 0.3); // per-particle: 70%-100%
   }
 `;
 
