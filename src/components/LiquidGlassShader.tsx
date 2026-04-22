@@ -40,17 +40,31 @@ const vertexShader = `
   uniform float uTime;
   uniform vec2 uResolution;
   attribute vec3 customColor;
+  attribute vec4 aRandom; // x=phase(0-2π), y=speed(0.08-0.28), z=orbitR(0.3-1.1), w=opacityMul
   varying vec3 vColor;
   varying float vSoftness;
   varying float vOpacity;
 
   void main() {
     vColor = customColor;
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+
+    // GPU-SIDE orbital drift — Lusion curlStr-equivalent
+    float phase = aRandom.x;
+    float speed = aRandom.y;
+    float orbitR = aRandom.z;
+    float t = uTime * speed + phase;
+
+    vec3 drift = vec3(
+      sin(t) * orbitR,
+      cos(t * 1.3 + phase * 2.0) * orbitR * 0.7,
+      sin(t * 0.7 + phase * 3.0) * orbitR * 0.15
+    );
+
+    vec3 pos = position + drift;
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Lusion-exact pSize formula (строка 48602):
-    // pSize = (coef * 200.0 * u_pSizeMul) / -mvPosition.z * resolution.y / 1280
+    // Lusion-exact pSize: (coef*200*u_pSizeMul)/-mvZ * resY/1280
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
     float pSize = (coef * 200.0 * 0.4) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
@@ -60,10 +74,10 @@ const vertexShader = `
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
 
     // Zonal brightness: center=full, edges fade
-    float distFromCenter = length(position.xy) / 5.0;
+    float distFromCenter = length(pos.xy) / 5.0;
     float isCenter = 1.0 - smoothstep(0.2, 0.6, distFromCenter);
     float edgeFade = 0.35 + 0.65 * (1.0 - smoothstep(0.4, 1.0, distFromCenter));
-    vOpacity = ${U_OPACITY} * mix(edgeFade, 1.0, isCenter);
+    vOpacity = ${U_OPACITY} * mix(edgeFade, 1.0, isCenter) * aRandom.w;
   }
 `;
 
@@ -71,43 +85,34 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const pointsRef = useRef<THREE.Points>(null);
 	const { size } = useThree();
 
-	// Store base positions + random params ONCE, Lusion-exact spawn bounds
-	const [[basePositions, positions, colors, randoms]] = useState(() => {
-		const base = new Float32Array(particleCount * 3);
+	// Positions + random params, Lusion-exact spawn bounds
+	const [[positions, colors, randoms]] = useState(() => {
 		const pos = new Float32Array(particleCount * 3);
 		const col = new Float32Array(particleCount * 3);
 		const rnd = new Float32Array(particleCount * 4);
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		// Lusion-exact spawn bounds (строка 48653):
-		// bounds: {x:4, y:2.4, z:0.64}, offset: {x:-3, y:-0.5, z:0}
+		// Lusion-exact spawn bounds (строка 48653)
 		const BOUNDS = { x: 4, y: 2.4, z: 0.64 };
 		const OFFSET = { x: -3, y: -0.5, z: 0 };
 
 		for (let i = 0; i < particleCount; i++) {
-			const x = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
-			const y = (Math.random() - 0.5) * 2 * BOUNDS.y + OFFSET.y;
-			const z = (Math.random() - 0.5) * 2 * BOUNDS.z + OFFSET.z;
-
-			base[i * 3] = x;
-			base[i * 3 + 1] = y;
-			base[i * 3 + 2] = z;
-			pos[i * 3] = x;
-			pos[i * 3 + 1] = y;
-			pos[i * 3 + 2] = z;
+			pos[i * 3]     = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
+			pos[i * 3 + 1] = (Math.random() - 0.5) * 2 * BOUNDS.y + OFFSET.y;
+			pos[i * 3 + 2] = (Math.random() - 0.5) * 2 * BOUNDS.z + OFFSET.z;
 
 			const c = Math.random() > 0.5 ? baseColor : secondaryColor;
 			col[i * 3] = c.r;
 			col[i * 3 + 1] = c.g;
 			col[i * 3 + 2] = c.b;
 
-			rnd[i * 4] = Math.random() * 6.2832;               // phase (0-2π)
-			rnd[i * 4 + 1] = 0.08 + Math.random() * 0.20;      // speed (0.08-0.28) — Lusion curlStr range
-			rnd[i * 4 + 2] = 0.3 + Math.random() * 0.8;        // orbit radius (0.3-1.1) — within Lusion bounds
-			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;        // opacity mul (0.7-1.0)
+			rnd[i * 4]     = Math.random() * 6.2832;          // phase (0-2π)
+			rnd[i * 4 + 1] = 0.08 + Math.random() * 0.20;     // speed
+			rnd[i * 4 + 2] = 0.3 + Math.random() * 0.8;       // orbit radius
+			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;       // opacity mul
 		}
-		return [base, pos, col, rnd];
+		return [pos, col, rnd];
 	});
 
 	const uniforms = useMemo(
@@ -119,32 +124,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		[theme, size],
 	);
 
-	// CPU-SIDE ANIMATION — guaranteed visible motion
+	// GPU handles all animation — only update uTime
 	useFrame((state) => {
 		if (!pointsRef.current) return;
-		const time = state.clock.elapsedTime;
-		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
-		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
-
-		// Animate EVERY particle position each frame
-		const posAttr = pointsRef.current.geometry.attributes.position;
-		const arr = posAttr.array as Float32Array;
-
-		for (let i = 0; i < particleCount; i++) {
-			const phase = randoms[i * 4];
-			const speed = randoms[i * 4 + 1];
-			const radius = randoms[i * 4 + 2];
-
-			const t = time * speed + phase;
-			arr[i * 3]     = basePositions[i * 3]     + Math.sin(t) * radius;
-			arr[i * 3 + 1] = basePositions[i * 3 + 1] + Math.cos(t * 1.3 + phase * 2) * radius * 0.7;
-			arr[i * 3 + 2] = basePositions[i * 3 + 2] + Math.sin(t * 0.7 + phase * 3) * radius * 0.15;
-		}
-		posAttr.needsUpdate = true;
-
-		// Slow group rotation for macro drift
-		pointsRef.current.rotation.y = time * 0.012;
-		pointsRef.current.rotation.x = time * 0.006;
+		const mat = pointsRef.current.material as THREE.ShaderMaterial;
+		mat.uniforms.uTime.value = state.clock.elapsedTime;
+		mat.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
+		pointsRef.current.rotation.y = state.clock.elapsedTime * 0.008;
 	});
 
     const themedFragmentShader = `
@@ -172,6 +158,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			<bufferGeometry>
 				<bufferAttribute attach="attributes-position" args={[positions, 3]} />
 				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
+				<bufferAttribute attach="attributes-aRandom" args={[randoms, 4]} />
 			</bufferGeometry>
 			<shaderMaterial
 				vertexShader={vertexShader}
