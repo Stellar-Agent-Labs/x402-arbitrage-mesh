@@ -306,7 +306,8 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}
 			/>
-			<Noise opacity={theme === "dark" ? 0.025 : 0.015} />
+			{/* Noise REMOVED — was adding grainy film grain overlay. Lusion uses
+		    1-bit dithering in final pass (already in LusionFinalPass), NOT noise overlay */}
 			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.8} vignetteTo={1.8} />
 			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
 		</EffectComposer>
