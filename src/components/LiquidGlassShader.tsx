@@ -89,9 +89,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		// Lusion EXACT spawn bounds (строка 48653, dump verified)
+		// Lusion EXACT bounds dims (строка 48653), centered for our fov=45
 		const BOUNDS = { x: 4, y: 2.4, z: 0.64 };
-		const OFFSET = { x: -3, y: -0.5, z: 0 };
+		const OFFSET = { x: 0, y: 0, z: 0 };
 
 		for (let i = 0; i < particleCount; i++) {
 			pos[i * 3]     = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
@@ -289,8 +289,8 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* Stars REMOVED — drei Stars cannot individually drift */}
 				<LiquidNebula theme={theme} particleCount={cfg.particles} />
 				
-				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
-				{tier !== "low" && <RefractiveCore tier={tier} />}
+				{/* RefractiveCore: DISABLED — MeshTransmission at z=5 causes 6x render pass lag */}
+				{/* {tier !== "low" && <RefractiveCore tier={tier} />} */}
 
 				{/* BrownianMotionCamera permanently disabled:
 				    Camera rotation causes parallax between HTML DOM text and 3D objects.
