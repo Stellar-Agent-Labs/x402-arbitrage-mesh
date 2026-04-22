@@ -1,5 +1,6 @@
 "use client";
-import { Stars } from "@react-three/drei";
+// Stars REMOVED — cannot individually drift, only group rotation
+// All particles now unified in LiquidNebula with CPU-side animation
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
 	Bloom,
@@ -25,9 +26,9 @@ import LensHaloPass from "./LensHaloPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
-	high: { particles: 3000, stars: 6000, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
-	mid:  { particles: 1500, stars: 3000, smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
-	low:  { particles: 800,  stars: 1500, smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
+	high: { particles: 8000, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
+	mid:  { particles: 4000, smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
+	low:  { particles: 2000, smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
 };
 
 // Lusion-grade softness constants (from Blueprint §3, строка 48763)
@@ -39,106 +40,29 @@ const vertexShader = `
   uniform float uTime;
   uniform vec2 uResolution;
   attribute vec3 customColor;
-  attribute vec4 aRandom; // per-particle: x=phase, y=speed, z=orbitRadius, w=opacityMul
   varying vec3 vColor;
   varying float vSoftness;
   varying float vOpacity;
-  vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
-  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
-  
-  float snoise(vec3 v){ 
-    const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-    const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-    vec3 i  = floor(v + dot(v, C.yyy));
-    vec3 x0 = v - i + dot(i, C.xxx);
-    vec3 g = step(x0.yzx, x0.xyz);
-    vec3 l = 1.0 - g;
-    vec3 i1 = min( g.xyz, l.zxy );
-    vec3 i2 = max( g.xyz, l.zxy );
-    vec3 x1 = x0 - i1 +  C.xxx;
-    vec3 x2 = x0 - i2 + 2.0 * C.xxx;
-    vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
-    i = mod(i, 289.0);
-    vec4 p = permute(permute(permute(
-              i.z + vec4(0.0, i1.z, i2.z, 1.0))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-    float n_ = 1.0/7.0; 
-    vec3  ns = n_ * D.wyz - D.xzx;
-    vec4 j = p - 49.0 * floor(p * ns.z *ns.z); 
-    vec4 x_ = floor(j * ns.z);
-    vec4 y_ = floor(j - 7.0 * x_ );  
-    vec4 x = x_ *ns.x + ns.yyyy;
-    vec4 y = y_ *ns.x + ns.yyyy;
-    vec4 h = 1.0 - abs(x) - abs(y);
-    vec4 b0 = vec4(x.xy, y.xy);
-    vec4 b1 = vec4(x.zw, y.zw);
-    vec4 s0 = floor(b0)*2.0 + 1.0;
-    vec4 s1 = floor(b1)*2.0 + 1.0;
-    vec4 sh = -step(h, vec4(0.0));
-    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-    vec3 p0 = vec3(a0.xy,h.x);
-    vec3 p1 = vec3(a0.zw,h.y);
-    vec3 p2 = vec3(a1.xy,h.z);
-    vec3 p3 = vec3(a1.zw,h.w);
-    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-    m = m * m;
-    return 42.0 * dot( m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-  }
 
   void main() {
     vColor = customColor;
-    vec3 pos = position;
-    
-    // Per-particle unique phase & speed from aRandom attribute
-    float uniquePhase = aRandom.x * 6.2832; // full circle phase spread
-    float uniqueSpeed = 0.15 + aRandom.y * 0.35; // 0.15-0.50 rad/s (VISIBLE)
-    float orbitRadius = 1.5 + aRandom.z * 3.0;  // 1.5-4.5 units drift
-    
-    // PRIMARY: Sinusoidal orbital motion — clear, visible elliptical drift
-    float t = uTime * uniqueSpeed + uniquePhase;
-    float n1 = sin(t) * orbitRadius;
-    float n2 = cos(t * 1.3 + uniquePhase * 2.0) * orbitRadius * 0.7;
-    float n3 = sin(t * 0.7 + uniquePhase * 3.0) * orbitRadius * 0.15; // Z: subtle
-    
-    // SECONDARY: Thin noise layer for organic irregularity
-    float noisePhase = uTime * 0.04 + aRandom.x * 50.0;
-    n1 += snoise(pos * 0.2 + noisePhase) * 0.6;
-    n2 += snoise(pos.yzx * 0.2 + noisePhase + 10.0) * 0.6;
-    
-    // Rare surge: ~8% of particles get periodic large displacement
-    float surge = snoise(vec3(aRandom.x * 50.0, uTime * 0.05, 0.0));
-    float surgeGate = step(0.78, surge);
-    n1 += surgeGate * 3.0;
-    n2 += surgeGate * 2.5;
-    
-    vec3 newPos = pos + vec3(n1, n2, n3);
-    
-    vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+    // Positions are CPU-animated — no GPU drift needed
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     float baseSize = max(2.5, (55.0 / -mvPosition.z));
-    
-    // Lusion proportional scaling: particles scale with screen height
     gl_PointSize = baseSize * max(0.5, (uResolution.y / 1280.0));
 
-    // Lusion depth-aware softness (Blueprint §3)
+    // Depth-aware softness (Lusion Blueprint §3)
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
-    
-    // Zonal brightness: center 50% always bright + pulsates, edges fade
-    float distFromCenter = length(newPos.xy) / 10.0;
-    float isCenter = 1.0 - smoothstep(0.3, 0.7, distFromCenter); // 1.0 in center, 0.0 at edges
-    // Center particles: always full brightness, NO pulsation
-    float centerBright = 1.0;
-    // Edge particles: gradual fade to 30%
+
+    // Zonal brightness: center always bright, edges fade
+    float distFromCenter = length(position.xy) / 12.0;
+    float isCenter = 1.0 - smoothstep(0.3, 0.7, distFromCenter);
     float edgeFade = 0.3 + 0.7 * (1.0 - smoothstep(0.5, 1.2, distFromCenter));
-    float zonalOpacity = mix(edgeFade, centerBright, isCenter);
-    float opacityBase = ${U_OPACITY} * zonalOpacity;
-    vOpacity = opacityBase * (0.7 + aRandom.w * 0.3); // per-particle: 70%-100%
+    float zonalOpacity = mix(edgeFade, 1.0, isCenter);
+    vOpacity = ${U_OPACITY} * zonalOpacity;
   }
 `;
 
@@ -146,10 +70,12 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const pointsRef = useRef<THREE.Points>(null);
 	const { size } = useThree();
 
-	const [[positions, colors, randoms]] = useState(() => {
+	// Store base positions + random params ONCE
+	const [[basePositions, positions, colors, randoms]] = useState(() => {
+		const base = new Float32Array(particleCount * 3);
 		const pos = new Float32Array(particleCount * 3);
 		const col = new Float32Array(particleCount * 3);
-		const rnd = new Float32Array(particleCount * 4); // phase, speed, orbit, opacityMul
+		const rnd = new Float32Array(particleCount * 4);
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
@@ -159,22 +85,28 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			const phi = Math.acos(2 * v - 1);
 			const r = 10 * Math.random() ** 0.5;
 
-			pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-			pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-			pos[i * 3 + 2] = r * Math.cos(phi);
+			const x = r * Math.sin(phi) * Math.cos(theta);
+			const y = r * Math.sin(phi) * Math.sin(theta);
+			const z = r * Math.cos(phi);
+
+			base[i * 3] = x;
+			base[i * 3 + 1] = y;
+			base[i * 3 + 2] = z;
+			pos[i * 3] = x;
+			pos[i * 3 + 1] = y;
+			pos[i * 3 + 2] = z;
 
 			const c = Math.random() > 0.5 ? baseColor : secondaryColor;
 			col[i * 3] = c.r;
 			col[i * 3 + 1] = c.g;
 			col[i * 3 + 2] = c.b;
 
-			// Per-particle random: phase, speed, orbitRadius, opacityMultiplier
-			rnd[i * 4] = Math.random();     // unique phase offset
-			rnd[i * 4 + 1] = Math.random(); // unique speed
-			rnd[i * 4 + 2] = Math.random(); // unique orbit radius
-			rnd[i * 4 + 3] = Math.random(); // unique opacity multiplier
+			rnd[i * 4] = Math.random() * 6.2832;     // unique phase (0-2π)
+			rnd[i * 4 + 1] = 0.15 + Math.random() * 0.35; // unique speed (0.15-0.50)
+			rnd[i * 4 + 2] = 1.5 + Math.random() * 3.0;   // orbit radius (1.5-4.5)
+			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;   // opacity mul (0.7-1.0)
 		}
-		return [pos, col, rnd];
+		return [base, pos, col, rnd];
 	});
 
 	const uniforms = useMemo(
@@ -186,18 +118,32 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		[theme, size],
 	);
 
-    useFrame(() => {
-        if (pointsRef.current) {
-            (pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
-        }
-    });
-
+	// CPU-SIDE ANIMATION — guaranteed visible motion
 	useFrame((state) => {
 		if (!pointsRef.current) return;
 		const time = state.clock.elapsedTime;
 		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
-		pointsRef.current.rotation.y = time * 0.015;
-		pointsRef.current.rotation.x = time * 0.008;
+		(pointsRef.current.material as THREE.ShaderMaterial).uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
+
+		// Animate EVERY particle position each frame
+		const posAttr = pointsRef.current.geometry.attributes.position;
+		const arr = posAttr.array as Float32Array;
+
+		for (let i = 0; i < particleCount; i++) {
+			const phase = randoms[i * 4];
+			const speed = randoms[i * 4 + 1];
+			const radius = randoms[i * 4 + 2];
+
+			const t = time * speed + phase;
+			arr[i * 3]     = basePositions[i * 3]     + Math.sin(t) * radius;
+			arr[i * 3 + 1] = basePositions[i * 3 + 1] + Math.cos(t * 1.3 + phase * 2) * radius * 0.7;
+			arr[i * 3 + 2] = basePositions[i * 3 + 2] + Math.sin(t * 0.7 + phase * 3) * radius * 0.15;
+		}
+		posAttr.needsUpdate = true;
+
+		// Slow group rotation for macro drift
+		pointsRef.current.rotation.y = time * 0.012;
+		pointsRef.current.rotation.x = time * 0.006;
 	});
 
     const themedFragmentShader = `
@@ -225,7 +171,6 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			<bufferGeometry>
 				<bufferAttribute attach="attributes-position" args={[positions, 3]} />
 				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
-				<bufferAttribute attach="attributes-aRandom" args={[randoms, 4]} />
 			</bufferGeometry>
 			<shaderMaterial
 				vertexShader={vertexShader}
@@ -357,15 +302,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* Core Lighting & Voltage Surges */}
 				<VoltageLights theme={theme} />
 
-				<Stars
-					radius={100}
-					depth={50}
-					count={cfg.stars}
-					factor={6}
-					saturation={0}
-					fade
-					speed={0.5}
-				/>
+				{/* Stars REMOVED — drei Stars cannot individually drift */}
 				<LiquidNebula theme={theme} particleCount={cfg.particles} />
 				
 				{/* RefractiveCore: skip on low-tier (saves 5 full scene re-renders) */}
