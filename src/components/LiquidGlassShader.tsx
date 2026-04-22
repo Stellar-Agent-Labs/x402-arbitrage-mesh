@@ -10,7 +10,8 @@ import {
 } from "@react-three/postprocessing";
 import { SMAAPreset } from "postprocessing";
 import { BlendFunction } from "postprocessing";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
@@ -292,7 +293,15 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 		setPaintTexture(tex);
 	}, []);
 
-	return (
+	// Portal to body — bypass Lenis CSS transforms that break position:fixed
+	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+	useEffect(() => {
+		setPortalTarget(document.body);
+	}, []);
+
+	if (!portalTarget) return null;
+
+	return createPortal(
 		<div
 			style={{
 				position: "fixed",
@@ -318,7 +327,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 					factor={6}
 					saturation={0}
 					fade
-					speed={3}
+					speed={0.5}
 				/>
 				<LiquidNebula theme={theme} particleCount={cfg.particles} />
 				
@@ -333,6 +342,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				{/* Adaptive Post-Processing Pipeline — Lusion pipeline order */}
 				<AdaptivePostProcessing theme={theme} tier={tier} paintTexture={paintTexture} />
 			</Canvas>
-		</div>
+		</div>,
+		portalTarget,
 	);
 }
