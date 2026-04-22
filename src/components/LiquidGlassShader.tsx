@@ -63,20 +63,20 @@ const vertexShader = `
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // pSize scaled for our camera z=15 (Lusion at z≈5, so /3 compensation)
-    float focusDist = ${U_FOCUS_DIST} * 10.0;
-    float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
-    float pSize = (coef * 200.0 * 0.04) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
-    gl_PointSize = max(2.0, pSize);
+    // Simple distance-based size (Lusion pow(2.5) explodes at z=15)
+    float baseSize = 55.0 / max(0.1, -mvPosition.z);
+    gl_PointSize = max(2.0, baseSize * uResolution.y / 1080.0);
 
-    // Lusion-exact softness
-    vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
+    // Softness — linear only (no pow explosion)
+    float focusDist = 12.0;
+    float dz = abs(-mvPosition.z - focusDist);
+    vSoftness = dz * 0.3 * ${U_P_SOFT_MUL};
 
     // Zonal brightness: center=full, edges fade
     float distFromCenter = length(pos.xy) / 14.0;
     float isCenter = 1.0 - smoothstep(0.2, 0.6, distFromCenter);
     float edgeFade = 0.35 + 0.65 * (1.0 - smoothstep(0.4, 1.0, distFromCenter));
-    vOpacity = ${U_OPACITY} * mix(edgeFade, 1.0, isCenter) * aRandom.w;
+    vOpacity = 0.65 * mix(edgeFade, 1.0, isCenter) * aRandom.w;
   }
 `;
 
