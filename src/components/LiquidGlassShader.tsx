@@ -51,25 +51,26 @@ const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
 const SPAWN_OX = "0.0"; const SPAWN_OY = "0.0"; const SPAWN_OZ = "0.0";
 const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
 
-// ── Simplex 4D noise + Curl (from Lusion dump line 48606) ──
+// ── Exact Lusion GLSL: Simplex 4D Derivatives + Curl (from 01_particle_position_shader.glsl) ──
 const NOISE_GLSL = /* glsl */ `
 vec4 mod289(vec4 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
 float mod289(float x) { return x - floor(x * (1.0/289.0)) * 289.0; }
-vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-float permute(float x) { return mod289(((x*34.0)+1.0)*x); }
+vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+float permute(float x) { return mod289(((x * 34.0) + 1.0) * x); }
 vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
 float taylorInvSqrt(float r) { return 1.79284291400159 - 0.85373472095314 * r; }
 
 vec4 grad4(float j, vec4 ip) {
-  vec4 p,s;
-  p.xyz = floor(fract(vec3(j)*ip.xyz)*7.0)*ip.z-1.0;
-  p.w = 1.5 - dot(abs(p.xyz), vec3(1.0));
+  vec4 p, s;
+  p.xyz = floor(fract(vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
+  p.w = 1.5 - dot(abs(p.xyz), vec3(1.0, 1.0, 1.0));
   s = vec4(lessThan(p, vec4(0.0)));
-  p.xyz = p.xyz + (s.xyz*2.0-1.0)*s.www;
+  p.xyz = p.xyz + (s.xyz * 2.0 - 1.0) * s.www;
   return p;
 }
 
-float snoise(vec4 v) {
+// Lusion EXACT: returns vec4(dx, dy, dz, dw) * 49.0 — ANALYTICAL DERIVATIVES
+vec4 simplexNoiseDerivatives(vec4 v) {
   const vec4 C = vec4(0.138196601125011, 0.276393202250021, 0.414589803375032, -0.447213595499958);
   vec4 i = floor(v + dot(v, vec4(0.309016994374947451)));
   vec4 x0 = v - i + dot(i, C.xxxx);
@@ -83,135 +84,150 @@ float snoise(vec4 v) {
   i0.z += isYZ.z;
   i0.w += 1.0 - isYZ.z;
   vec4 i3 = clamp(i0, 0.0, 1.0);
-  vec4 i2 = clamp(i0-1.0, 0.0, 1.0);
-  vec4 i1 = clamp(i0-2.0, 0.0, 1.0);
+  vec4 i2 = clamp(i0 - 1.0, 0.0, 1.0);
+  vec4 i1 = clamp(i0 - 2.0, 0.0, 1.0);
   vec4 x1 = x0 - i1 + C.xxxx;
   vec4 x2 = x0 - i2 + C.yyyy;
   vec4 x3 = x0 - i3 + C.zzzz;
   vec4 x4 = x0 + C.wwww;
   i = mod289(i);
-  float j0 = permute(permute(permute(permute(i.w)+i.z)+i.y)+i.x);
+  float j0 = permute(permute(permute(permute(i.w) + i.z) + i.y) + i.x);
   vec4 j1 = permute(permute(permute(permute(
-            i.w + vec4(i1.w,i2.w,i3.w,1.0))
-          + i.z + vec4(i1.z,i2.z,i3.z,1.0))
-          + i.y + vec4(i1.y,i2.y,i3.y,1.0))
-          + i.x + vec4(i1.x,i2.x,i3.x,1.0));
-  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0);
-  vec4 p0 = grad4(j0, ip);
-  vec4 p1 = grad4(j1.x, ip);
-  vec4 p2 = grad4(j1.y, ip);
-  vec4 p3 = grad4(j1.z, ip);
-  vec4 p4 = grad4(j1.w, ip);
-  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+      i.w + vec4(i1.w, i2.w, i3.w, 1.0)) +
+      i.z + vec4(i1.z, i2.z, i3.z, 1.0)) +
+      i.y + vec4(i1.y, i2.y, i3.y, 1.0)) +
+      i.x + vec4(i1.x, i2.x, i3.x, 1.0));
+  vec4 ip2 = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0);
+  vec4 p0 = grad4(j0, ip2);
+  vec4 p1 = grad4(j1.x, ip2);
+  vec4 p2 = grad4(j1.y, ip2);
+  vec4 p3 = grad4(j1.z, ip2);
+  vec4 p4 = grad4(j1.w, ip2);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
   p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-  p4 *= taylorInvSqrt(dot(p4,p4));
-  vec3 m0 = max(0.6 - vec3(dot(x0,x0),dot(x1,x1),dot(x2,x2)), 0.0);
-  vec2 m1 = max(0.6 - vec2(dot(x3,x3),dot(x4,x4)), 0.0);
-  m0 = m0*m0; m1 = m1*m1;
-  return 49.0*(dot(m0*m0, vec3(dot(p0,x0),dot(p1,x1),dot(p2,x2)))
-             + dot(m1*m1, vec2(dot(p3,x3),dot(p4,x4))));
+  p4 *= taylorInvSqrt(dot(p4, p4));
+  vec3 values0 = vec3(dot(p0,x0), dot(p1,x1), dot(p2,x2));
+  vec2 values1 = vec2(dot(p3,x3), dot(p4,x4));
+  vec3 m0 = max(0.5 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);
+  vec2 m1 = max(0.5 - vec2(dot(x3,x3), dot(x4,x4)), 0.0);
+  vec3 temp0 = -6.0 * m0 * m0 * values0;
+  vec2 temp1 = -6.0 * m1 * m1 * values1;
+  vec3 mmm0 = m0 * m0 * m0;
+  vec2 mmm1 = m1 * m1 * m1;
+  float dx2 = temp0[0]*x0.x + temp0[1]*x1.x + temp0[2]*x2.x + temp1[0]*x3.x + temp1[1]*x4.x + mmm0[0]*p0.x + mmm0[1]*p1.x + mmm0[2]*p2.x + mmm1[0]*p3.x + mmm1[1]*p4.x;
+  float dy2 = temp0[0]*x0.y + temp0[1]*x1.y + temp0[2]*x2.y + temp1[0]*x3.y + temp1[1]*x4.y + mmm0[0]*p0.y + mmm0[1]*p1.y + mmm0[2]*p2.y + mmm1[0]*p3.y + mmm1[1]*p4.y;
+  float dz2 = temp0[0]*x0.z + temp0[1]*x1.z + temp0[2]*x2.z + temp1[0]*x3.z + temp1[1]*x4.z + mmm0[0]*p0.z + mmm0[1]*p1.z + mmm0[2]*p2.z + mmm1[0]*p3.z + mmm1[1]*p4.z;
+  float dw2 = temp0[0]*x0.w + temp0[1]*x1.w + temp0[2]*x2.w + temp1[0]*x3.w + temp1[1]*x4.w + mmm0[0]*p0.w + mmm0[1]*p1.w + mmm0[2]*p2.w + mmm1[0]*p3.w + mmm1[1]*p4.w;
+  return vec4(dx2, dy2, dz2, dw2) * 49.0;
 }
 
-// Curl function — Lusion строка 48610
-vec3 curl(vec3 p, float t, float persistence) {
-  float e = 0.1;
-  vec3 dx = vec3(e, 0.0, 0.0);
-  vec3 dy = vec3(0.0, e, 0.0);
-  vec3 dz = vec3(0.0, 0.0, e);
-  
-  float n = snoise(vec4(p, t));
-  float a = snoise(vec4(p + dx, t));
-  float b = snoise(vec4(p - dx, t));
-  float c = snoise(vec4(p + dy, t));
-  float d = snoise(vec4(p - dy, t));
-  float f = snoise(vec4(p + dz, t));
-  float g = snoise(vec4(p - dz, t));
-  
-  // Second octave with persistence
-  n += persistence * snoise(vec4(p * 2.0, t));
-  a += persistence * snoise(vec4((p + dx) * 2.0, t));
-  b += persistence * snoise(vec4((p - dx) * 2.0, t));
-  c += persistence * snoise(vec4((p + dy) * 2.0, t));
-  d += persistence * snoise(vec4((p - dy) * 2.0, t));
-  f += persistence * snoise(vec4((p + dz) * 2.0, t));
-  g += persistence * snoise(vec4((p - dz) * 2.0, t));
-  
-  float x1r = (c - d) / (2.0 * e) - (f - g) / (2.0 * e);
-  float y1r = (f - g) / (2.0 * e) - (a - b) / (2.0 * e);
-  float z1r = (a - b) / (2.0 * e) - (c - d) / (2.0 * e);
-  return vec3(x1r, y1r, z1r);
+// Lusion EXACT curl: 3 independent noise fields with offset vectors, 2 octaves
+vec3 curl(in vec3 p, in float noiseTime, in float persistence) {
+  vec4 xNoisePotentialDerivatives = vec4(0.0);
+  vec4 yNoisePotentialDerivatives = vec4(0.0);
+  vec4 zNoisePotentialDerivatives = vec4(0.0);
+  for (int i = 0; i < 2; ++i) {
+    float twoPowI = pow(2.0, float(i));
+    float scale = 0.5 * twoPowI * pow(persistence, float(i));
+    xNoisePotentialDerivatives += simplexNoiseDerivatives(vec4(p * twoPowI, noiseTime)) * scale;
+    yNoisePotentialDerivatives += simplexNoiseDerivatives(vec4((p + vec3(123.4, 129845.6, -1239.1)) * twoPowI, noiseTime)) * scale;
+    zNoisePotentialDerivatives += simplexNoiseDerivatives(vec4((p + vec3(-9519.0, 9051.0, -123.0)) * twoPowI, noiseTime)) * scale;
+  }
+  return vec3(
+    zNoisePotentialDerivatives[1] - yNoisePotentialDerivatives[2],
+    xNoisePotentialDerivatives[2] - zNoisePotentialDerivatives[0],
+    yNoisePotentialDerivatives[0] - xNoisePotentialDerivatives[1]
+  );
+}
+
+vec3 hash33(vec3 p3) {
+  p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
+  p3 += dot(p3, p3.yxz + 33.33);
+  return fract((p3.xxy + p3.yxx) * p3.zyx);
 }
 `;
 
-// ── Position Compute Shader (строки 48785-48800) ──
+// ── Position Compute Shader — EXACT from 01_particle_position_shader.glsl ──
 const positionShader = /* glsl */ `
 ${NOISE_GLSL}
 
+uniform sampler2D u_defaultPosTex;
 uniform float u_time;
 uniform float u_deltaTime;
-uniform float u_simSpeed;       // 0.12
-uniform float u_simDieSpeed;    // 0.32
-uniform vec3 u_curlNoiseScale;  // vec3(0.2, 0.6, 0.2)
-uniform vec3 u_curlStrength;    // vec3(0.2, 0.12, 0.12)
-uniform float u_curlStrMul;     // 0.6
+uniform float u_simSpeed;
+uniform float u_simDieSpeed;
+uniform vec3 u_curlNoiseScale;
+uniform vec3 u_curlStrength;
+uniform float u_curlStrMul;
+uniform vec3 u_bounds;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
-  vec4 posLife = texture2D(texturePosition, uv);
-  vec4 vel = texture2D(textureVelocity, uv);
-  
-  // Life cycle (строка 48701)
-  posLife.w += u_simDieSpeed * u_deltaTime;
-  
-  // Kill bounds check (строка 48664)
-  bool dead = posLife.w >= 1.0 ||
-    abs(posLife.x) > ${KILL_X} ||
-    abs(posLife.y) > ${KILL_Y} ||
-    abs(posLife.z) > ${KILL_Z};
-    
-  if (dead) {
-    // Respawn in spawn bounds (строка 48653)
-    float r1 = fract(sin(dot(uv + u_time, vec2(12.9898, 78.233))) * 43758.5453);
-    float r2 = fract(sin(dot(uv + u_time, vec2(63.7264, 10.873))) * 43758.5453);
-    float r3 = fract(sin(dot(uv + u_time, vec2(36.7539, 50.3658))) * 43758.5453);
-    posLife.x = (r1 - 0.5) * 2.0 * ${SPAWN_X} + ${SPAWN_OX};
-    posLife.y = (r2 - 0.5) * 2.0 * ${SPAWN_Y} + ${SPAWN_OY};
-    posLife.z = (r3 - 0.5) * 2.0 * ${SPAWN_Z} + ${SPAWN_OZ};
-    posLife.w = 0.0;
-    gl_FragColor = posLife;
-    return;
+  vec4 positionLife = texture2D(texturePosition, uv);
+  vec4 velInfo = texture2D(textureVelocity, uv);
+
+  // Life decay (GOES DOWN: 1.0 → 0.0) — Lusion exact
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01 * (1.0 + velInfo.w);
+
+  // Respawn when life < 0
+  if (positionLife.w < 0.0) {
+    vec3 h = hash33(vec3(uv, u_time));
+    positionLife.xyz = texture2D(u_defaultPosTex, uv).xyz;
+    positionLife.w = 1.0;
   }
-  
-  // Velocity integration (строка 48798)
-  posLife.xyz += vel.xyz * u_deltaTime;
-  
-  // Curl noise displacement — applied to POSITION, not velocity (строка 48800)
-  vec3 curlScale = u_curlNoiseScale;
+
+  // Kill bounds via step() multiplication — Lusion exact
+  vec3 boundCheck = step(positionLife.xyz, u_bounds);
+  boundCheck *= step(-u_bounds, positionLife.xyz);
+  positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
+
+  // Velocity integration
+  positionLife.xyz += velInfo.xyz * u_deltaTime;
+
+  // Curl noise displacement — applied to POSITION (stop-motion)
   vec3 curlStr = u_curlStrength * u_curlStrMul;
-  vec3 curlVel = curl(posLife.xyz * curlScale, u_time * u_simSpeed, 0.02) * curlStr * u_deltaTime;
-  posLife.xyz += curlVel;
-  
-  gl_FragColor = posLife;
+  vec3 curlScale = u_curlNoiseScale;
+  vec3 curlVel = curl(positionLife.xyz * curlScale, u_time * u_simSpeed, 0.02) * curlStr * u_deltaTime;
+  positionLife.xyz += curlVel;
+
+  gl_FragColor = positionLife;
 }
 `;
 
-// ── Velocity Compute Shader (строки 48813-48830) ──
+// ── Velocity Compute Shader — EXACT from 02_particle_velocity_shader.glsl ──
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
-uniform vec3 u_windForce;       // vec3(0.16, 0, 0)
-uniform float u_windStrMul;     // 1.2
+uniform float u_time;
+uniform float u_simDieSpeed;
+uniform vec3 u_windForce;
+uniform float u_windStrMul;
+
+vec3 hash33(vec3 p3) {
+  p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
+  p3 += dot(p3, p3.yxz + 33.33);
+  return fract((p3.xxy + p3.yxx) * p3.zyx);
+}
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
-  vec4 vel = texture2D(textureVelocity, uv);
-  
-  // Damping 0.975 (строка 48813)
-  vel.xyz *= 0.975;
-  
-  // Wind force (строка 48817)
-  vel.xyz += u_windForce * u_windStrMul * u_deltaTime;
-  
-  gl_FragColor = vel;
+  vec4 positionLife = texture2D(texturePosition, uv);
+  vec4 velInfo = texture2D(textureVelocity, uv);
+
+  // Life decay check for respawn
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
+  if (positionLife.w < 0.0) {
+    vec3 h = hash33(vec3(uv, u_time));
+    velInfo.w = 0.0;
+  }
+
+  // Damping 0.975 — Lusion exact
+  velInfo.xyz *= 0.975;
+
+  // Wind force — Lusion exact
+  vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
+  velInfo.xyz += windVel;
+
+  gl_FragColor = velInfo;
 }
 `;
 
@@ -291,17 +307,26 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	useEffect(() => {
 		const gpu = new GPUComputationRenderer(TEX_SIZE, TEX_SIZE, gl);
 
-		// Position texture: xyz = spawn position, w = life (0-1)
+		// Position texture: xyz = spawn position, w = life (starts at 1.0, decays to 0)
 		const posTex = gpu.createTexture();
 		const posData = posTex.image.data as Float32Array;
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
 			posData[i * 4]     = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
 			posData[i * 4 + 1] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
 			posData[i * 4 + 2] = (Math.random() - 0.5) * 2 * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
-			posData[i * 4 + 3] = Math.random(); // stagger life so not all die at once
+			posData[i * 4 + 3] = Math.random(); // stagger life (1.0→0.0)
 		}
 
-		// Velocity texture: xyz = velocity, w = unused
+		// Default position texture for respawn (Lusion exact: texture2D(u_defaultPosTex, uv))
+		const defaultPosTex = gpu.createTexture();
+		const defaultPosData = defaultPosTex.image.data as Float32Array;
+		defaultPosData.set(posData); // copy initial positions
+		const defaultPosDataTex = new THREE.DataTexture(
+			defaultPosData, TEX_SIZE, TEX_SIZE, THREE.RGBAFormat, THREE.FloatType
+		);
+		defaultPosDataTex.needsUpdate = true;
+
+		// Velocity texture: xyz = velocity, w = mode weight
 		const velTex = gpu.createTexture();
 
 		const posVar = gpu.addVariable("texturePosition", positionShader, posTex);
@@ -310,7 +335,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		gpu.setVariableDependencies(posVar, [posVar, velVar]);
 		gpu.setVariableDependencies(velVar, [posVar, velVar]);
 
-		// Position uniforms (строки 48785-48800)
+		// Position uniforms — Lusion exact from Particles.js _initTextures()
+		posVar.material.uniforms.u_defaultPosTex = { value: defaultPosDataTex };
 		posVar.material.uniforms.u_time = { value: 0 };
 		posVar.material.uniforms.u_deltaTime = { value: 0.016 };
 		posVar.material.uniforms.u_simSpeed = { value: 0.12 };
@@ -318,9 +344,12 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVar.material.uniforms.u_curlNoiseScale = { value: new THREE.Vector3(0.2, 0.6, 0.2) };
 		posVar.material.uniforms.u_curlStrength = { value: new THREE.Vector3(0.2, 0.12, 0.12) };
 		posVar.material.uniforms.u_curlStrMul = { value: 0.6 };
+		posVar.material.uniforms.u_bounds = { value: new THREE.Vector3(7.0, 5.0, 2.0) };
 
-		// Velocity uniforms (строки 48813-48830)
+		// Velocity uniforms — Lusion exact from Particles.js _initTextures()
 		velVar.material.uniforms.u_deltaTime = { value: 0.016 };
+		velVar.material.uniforms.u_time = { value: 0 };
+		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1.2 };
 
@@ -358,9 +387,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 		const clampedDelta = Math.min(delta, 0.05); // cap at 50ms
 
-		// Update compute uniforms
+		// Update compute uniforms — both shaders need time + delta
 		posVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
 		posVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
+		velVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
 		velVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
 
 		// Run GPGPU compute
