@@ -46,7 +46,7 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 				const suffix = randomLog.endsWith(": ") ? Math.floor(Math.random() * 9999).toString(16).toUpperCase() + "ms" : "";
 				
 				setLogs((prev) => {
-					const newArray = [...prev, { id: Date.now(), text: randomLog + suffix }];
+					const newArray = [...prev, { id: `${Date.now()}_${Math.random()}`, text: randomLog + suffix }];
 					return newArray.length > 7 ? newArray.slice(newArray.length - 7) : newArray;
 				});
 				timeoutId = setTimeout(streamLogs, 800 + Math.random() * 2000);
