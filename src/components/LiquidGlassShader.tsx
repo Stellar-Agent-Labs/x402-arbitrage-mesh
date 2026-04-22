@@ -39,6 +39,7 @@ const vertexShader = `
   uniform float uTime;
   uniform vec2 uResolution;
   attribute vec3 customColor;
+  attribute vec4 aRandom; // per-particle: x=phase, y=speed, z=orbitRadius, w=opacityMul
   varying vec3 vColor;
   varying float vSoftness;
   varying float vOpacity;
@@ -92,10 +93,21 @@ const vertexShader = `
     vColor = customColor;
     vec3 pos = position;
     
-    float phase = uTime * 0.10; // visible drift speed
-    float n1 = snoise(pos * 0.35 + phase) * 0.9; 
-    float n2 = snoise(pos.yzx * 0.35 + phase + 10.0) * 0.9;
-    float n3 = snoise(pos.zxy * 0.35 + phase + 20.0) * 0.9;
+    // Per-particle unique phase & speed from aRandom attribute
+    float uniquePhase = aRandom.x * 100.0;  // large spread avoids sync
+    float uniqueSpeed = 0.06 + aRandom.y * 0.08; // 0.06-0.14 range
+    float orbitRadius = 0.5 + aRandom.z * 1.0;  // 0.5-1.5 drift amplitude
+    
+    float phase = uTime * uniqueSpeed + uniquePhase;
+    float n1 = snoise(pos * 0.25 + phase) * orbitRadius; 
+    float n2 = snoise(pos.yzx * 0.25 + phase + 10.0) * orbitRadius;
+    float n3 = snoise(pos.zxy * 0.25 + phase + 20.0) * orbitRadius;
+    
+    // Rare surge: ~5% of particles get occasional large displacement
+    float surge = snoise(vec3(aRandom.x * 50.0, uTime * 0.03, 0.0));
+    float surgeGate = step(0.85, surge); // only activates above 0.85
+    n1 += surgeGate * snoise(pos * 0.1 + uTime * 0.2) * 2.0;
+    n2 += surgeGate * snoise(pos.yzx * 0.1 + uTime * 0.2) * 1.5;
     
     vec3 newPos = pos + vec3(n1, n2, n3);
     
@@ -106,11 +118,16 @@ const vertexShader = `
     // Lusion proportional scaling: particles scale with screen height
     gl_PointSize = baseSize * max(0.5, (uResolution.y / 1280.0));
 
-    // Lusion depth-aware softness (Blueprint §3, строки 48602-48164)
+    // Lusion depth-aware softness (Blueprint §3)
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
-    vOpacity = ${U_OPACITY};
+    
+    // Zonal brightness: center=bright, edges=dim + per-particle variation
+    float distFromCenter = length(newPos.xy) / 10.0; // normalize to 0-1
+    float zonalFade = 1.0 - smoothstep(0.2, 1.0, distFromCenter); // bright center, dim edges
+    float opacityBase = ${U_OPACITY} * (0.5 + zonalFade * 0.5); // 50%-100% range
+    vOpacity = opacityBase * (0.6 + aRandom.w * 0.4); // per-particle: 60%-100% of zonal
   }
 `;
 
@@ -118,9 +135,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const pointsRef = useRef<THREE.Points>(null);
 	const { size } = useThree();
 
-	const [[positions, colors]] = useState(() => {
+	const [[positions, colors, randoms]] = useState(() => {
 		const pos = new Float32Array(particleCount * 3);
 		const col = new Float32Array(particleCount * 3);
+		const rnd = new Float32Array(particleCount * 4); // phase, speed, orbit, opacityMul
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
@@ -138,8 +156,14 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			col[i * 3] = c.r;
 			col[i * 3 + 1] = c.g;
 			col[i * 3 + 2] = c.b;
+
+			// Per-particle random: phase, speed, orbitRadius, opacityMultiplier
+			rnd[i * 4] = Math.random();     // unique phase offset
+			rnd[i * 4 + 1] = Math.random(); // unique speed
+			rnd[i * 4 + 2] = Math.random(); // unique orbit radius
+			rnd[i * 4 + 3] = Math.random(); // unique opacity multiplier
 		}
-		return [pos, col];
+		return [pos, col, rnd];
 	});
 
 	const uniforms = useMemo(
@@ -190,6 +214,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			<bufferGeometry>
 				<bufferAttribute attach="attributes-position" args={[positions, 3]} />
 				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
+				<bufferAttribute attach="attributes-aRandom" args={[randoms, 4]} />
 			</bufferGeometry>
 			<shaderMaterial
 				vertexShader={vertexShader}
