@@ -64,17 +64,17 @@ const vertexShader = `
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Lusion-exact pSize: (coef*200*u_pSizeMul)/-mvZ * resY/1280
+    // pSize scaled for our camera z=15 (Lusion at z≈5, so /3 compensation)
     float focusDist = ${U_FOCUS_DIST} * 10.0;
     float coef = abs(-mvPosition.z - focusDist) * 0.3 + pow(max(0.0, -mvPosition.z - focusDist), 2.5) * 0.5;
-    float pSize = (coef * 200.0 * 0.4) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+    float pSize = (coef * 200.0 * 0.06) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
     gl_PointSize = max(1.5, pSize);
 
     // Lusion-exact softness
     vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
 
     // Zonal brightness: center=full, edges fade
-    float distFromCenter = length(pos.xy) / 5.0;
+    float distFromCenter = length(pos.xy) / 14.0;
     float isCenter = 1.0 - smoothstep(0.2, 0.6, distFromCenter);
     float edgeFade = 0.35 + 0.65 * (1.0 - smoothstep(0.4, 1.0, distFromCenter));
     vOpacity = ${U_OPACITY} * mix(edgeFade, 1.0, isCenter) * aRandom.w;
@@ -93,9 +93,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const baseColor = new THREE.Color("#e8dcc8");
 		const secondaryColor = new THREE.Color("#0fa33a");
 
-		// Lusion-exact spawn bounds (строка 48653)
-		const BOUNDS = { x: 4, y: 2.4, z: 0.64 };
-		const OFFSET = { x: -3, y: -0.5, z: 0 };
+		// Lusion bounds ×3 for our camera z=15 (Lusion z≈5)
+		const BOUNDS = { x: 12, y: 7.2, z: 1.92 };
+		const OFFSET = { x: 0, y: 0, z: 0 }; // centered for our scene
 
 		for (let i = 0; i < particleCount; i++) {
 			pos[i * 3]     = (Math.random() - 0.5) * 2 * BOUNDS.x + OFFSET.x;
@@ -109,7 +109,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 			rnd[i * 4]     = Math.random() * 6.2832;          // phase (0-2π)
 			rnd[i * 4 + 1] = 0.08 + Math.random() * 0.20;     // speed
-			rnd[i * 4 + 2] = 0.3 + Math.random() * 0.8;       // orbit radius
+			rnd[i * 4 + 2] = 0.8 + Math.random() * 2.5;       // orbit radius (scaled for z=15 bounds)
 			rnd[i * 4 + 3] = 0.7 + Math.random() * 0.3;       // opacity mul
 		}
 		return [pos, col, rnd];
