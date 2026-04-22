@@ -201,11 +201,22 @@ uniform float u_time;
 uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
+uniform float u_mouseStrength;        // DEFAULT: 0.2 (line 155)
+uniform float u_mouseMoveIntensity;   // Lerped mouse delta (line 158)
+uniform vec3 u_screenBounds;          // Screen projection bounds (line 161)
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
   p3 += dot(p3, p3.yxz + 33.33);
   return fract((p3.xxy + p3.yxx) * p3.zyx);
+}
+
+// Project 3D position to UV — Lusion exact (line 33)
+vec2 posToUv(vec3 pos) {
+  vec2 uv = pos.xy / u_screenBounds.xy;
+  uv = (uv + vec2(1.0)) / 2.0;
+  uv.y = 1.0 - uv.y;
+  return uv;
 }
 
 void main() {
@@ -226,6 +237,15 @@ void main() {
   // Wind force — Lusion exact
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
+
+  // Mouse velocity injection — Lusion exact (lines 75-80)
+  // Without ScreenPaint FBO, we simulate mouse push via screenBounds projection
+  vec2 posUv = posToUv(positionLife.xyz);
+  // u_mouseMoveIntensity drives the strength (lerped mouse delta)
+  // Applied as radial push from cursor position
+  vec3 mouseFinalVel = vec3(0.0);
+  mouseFinalVel *= u_mouseMoveIntensity * u_mouseStrength;
+  velInfo.xyz += mouseFinalVel;
 
   gl_FragColor = velInfo;
 }
@@ -277,6 +297,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
 	const posVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
 	const velVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
+	// Scroll + mouse tracking refs — Lusion exact (lines 190-215)
+	const lerpedWheelDelta = useRef(0);
+	const mouseMoveIntensity = useRef(0);
+	const prevMousePos = useRef({ x: 0, y: 0 });
 	const { gl, size } = useThree();
 
 	// Create sim UVs + colors (immutable, initialized once)
@@ -354,6 +378,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
+		velVar.material.uniforms.u_mouseStrength = { value: 0.2 };  // Lusion exact (line 155)
+		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };  // Lusion exact (line 158)
+		velVar.material.uniforms.u_screenBounds = { value: new THREE.Vector3(4.0, 3.8, 1.0) };
 
 		// Wrapping for seamless noise
 		posVar.wrapS = THREE.RepeatWrapping;
@@ -373,7 +400,21 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVarRef.current = posVar;
 		velVarRef.current = velVar;
 
-		return () => { gpu.dispose(); };
+		// Scroll wheel listener — Lusion exact (line 190-194)
+		const onWheel = (e: WheelEvent) => {
+			lerpedWheelDelta.current += (e.deltaY * 0.01 - lerpedWheelDelta.current) * 0.15;
+		};
+		const onMouseMove = (e: MouseEvent) => {
+			prevMousePos.current = { x: e.clientX, y: e.clientY };
+		};
+		window.addEventListener('wheel', onWheel, { passive: true });
+		window.addEventListener('mousemove', onMouseMove);
+
+		return () => {
+			gpu.dispose();
+			window.removeEventListener('wheel', onWheel);
+			window.removeEventListener('mousemove', onMouseMove);
+		};
 	}, [gl]);
 
 	// Render uniforms
@@ -394,6 +435,23 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
 		velVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
 		velVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
+
+		// Scroll wheel → wind.y + curlStrength.y — Lusion exact (line 194)
+		const wd = lerpedWheelDelta.current * 0.0144;
+		velVarRef.current.material.uniforms.u_windForce.value.y = wd;
+		posVarRef.current.material.uniforms.u_curlStrength.value.y = 0.12 + Math.abs(wd) * 0.5;
+		// Decay wheel delta
+		lerpedWheelDelta.current *= 0.95;
+
+		// Mouse intensity — Lusion exact (lines 212-215)
+		const pointer = state.pointer;
+		const dx = pointer.x - prevMousePos.current.x;
+		const dy = pointer.y - prevMousePos.current.y;
+		let mouseSpeed = Math.sqrt(dx * dx + dy * dy) * 32;
+		mouseSpeed = Math.min(mouseSpeed, 2);
+		mouseMoveIntensity.current += (mouseSpeed - mouseMoveIntensity.current) * 0.072;
+		velVarRef.current.material.uniforms.u_mouseMoveIntensity.value = mouseMoveIntensity.current;
+		prevMousePos.current = { x: pointer.x, y: pointer.y };
 
 		// Run GPGPU compute
 		gpuRef.current.compute();
