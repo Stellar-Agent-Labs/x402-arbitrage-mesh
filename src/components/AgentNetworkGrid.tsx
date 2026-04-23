@@ -45,22 +45,33 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 		borderColor = "transparent"; // Handled by rare-snake-border pseudo-element
 	}
 
+	// Lusion asymmetric bento — each card has unique grid placement
+	const LUSION_GRID_MAP: Record<number, React.CSSProperties> = {
+		0: { gridColumn: "1 / 8", gridRow: "span 2" },      // Large hero left
+		1: { gridColumn: "8 / 13", gridRow: "span 1" },     // Small right top
+		2: { gridColumn: "8 / 13", gridRow: "span 1" },     // Small right bottom
+		3: { gridColumn: "1 / 6", gridRow: "span 1" },      // Medium left
+		4: { gridColumn: "6 / 13", gridRow: "span 2" },     // Large right
+		5: { gridColumn: "1 / 6", gridRow: "span 1" },      // Medium left bottom
+		6: { gridColumn: "1 / 13", gridRow: "span 1" },     // Mark53 full-width
+	};
+	const gridPlacement = LUSION_GRID_MAP[index] || {};
+
 	return (
 		<motion.div
 			className={isMark53 ? "rare-snake-border" : ""}
 			// Lusion Benchmark Physics: Pure 1.5s duration, strict 15-degree X tilt, zero Y twisting, heavy Expo-Out bezier.
 			initial={{ opacity: 0, y: 150, rotateX: 15, scale: 0.95 }}
 			whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-			whileHover={{ y: -4, scale: 1.02 }}
+			whileHover={{ y: -4, scale: 1.075 }}
 			viewport={{ once: false, amount: 0.2 }}
 			transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: (index % 2) * 0.15 }}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			style={{
 				transformStyle: "preserve-3d",
-				transformOrigin: "center bottom",
-				// Masonry/Bento logic: Full width for 0, 3, and 6
-				gridColumn: index === 0 || index === 3 || index === 6 ? "1 / -1" : "auto",
+				transformOrigin: `top ${index % 2 === 0 ? "left" : "right"}`,
+				...gridPlacement,
 				padding: "clamp(1.5rem, 3vw, 3rem)",
 				background: hovered 
 					? (theme === "dark" ? "rgba(0,15,0,0.35)" : "rgba(240,255,245,0.6)")
@@ -277,9 +288,9 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				style={{
 					display: "grid",
                     // Bento grid: adaptive auto-fit
-					gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
-					gridAutoRows: "minmax(280px, auto)",
-					gap: "clamp(1rem, 3vw, 3.5rem)",
+					gridTemplateColumns: "repeat(12, 1fr)",
+					gridAutoRows: "minmax(200px, auto)",
+					gap: "clamp(0.75rem, 2vw, 2rem)",
 					paddingBottom: "3rem",
                     perspective: "1200px" // Required for the Lusion 3D tilt interaction
 				}}
