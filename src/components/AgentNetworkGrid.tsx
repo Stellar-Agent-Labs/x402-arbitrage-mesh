@@ -63,7 +63,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 			// Lusion Benchmark Physics: Pure 1.5s duration, strict 15-degree X tilt, zero Y twisting, heavy Expo-Out bezier.
 			initial={{ opacity: 0, y: 150, rotateX: 15, scale: 0.95 }}
 			whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-			whileHover={{ y: -4, scale: 1.075 }}
+			whileHover={{ y: -8, scale: 1.075, zIndex: 10 }}
 			viewport={{ once: false, amount: 0.2 }}
 			transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: (index % 2) * 0.15 }}
 			onMouseEnter={() => setHovered(true)}
@@ -290,7 +290,7 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
                     // Bento grid: adaptive auto-fit
 					gridTemplateColumns: "repeat(12, 1fr)",
 					gridAutoRows: "minmax(200px, auto)",
-					gap: "clamp(0.75rem, 2vw, 2rem)",
+					gap: "clamp(1.5rem, 4vw, 4rem)",
 					paddingBottom: "3rem",
                     perspective: "1200px" // Required for the Lusion 3D tilt interaction
 				}}
