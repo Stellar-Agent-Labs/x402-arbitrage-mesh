@@ -163,7 +163,7 @@ export default function Dashboard() {
     }, [progress, agentState, inputValue]);
 
 	return (
-		<main className="min-h-screen bg-[#050505] text-[#ededed] font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-24 pb-8 overflow-hidden">
+		<main className="min-h-screen bg-transparent text-[#ededed] font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-24 pb-8 overflow-hidden">
 			<Nav />
 			
 			<div className="w-full flex-1 flex flex-col mx-auto px-4 lg:px-8 mt-4 gap-8">

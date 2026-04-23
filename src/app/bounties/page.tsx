@@ -103,7 +103,7 @@ const BountiesPage = () => {
 	];
 
 	return (
-		<div style={{ backgroundColor: "#000", minHeight: "100vh", color: "#fff", fontFamily: "'Inter', sans-serif" }}>
+		<div style={{ backgroundColor: "transparent", minHeight: "100vh", color: "#fff", fontFamily: "'Inter', sans-serif" }}>
 			<Nav />
 
 			<div style={{ maxWidth: "1200px", margin: "0 auto", padding: "120px 2rem 4rem" }}>

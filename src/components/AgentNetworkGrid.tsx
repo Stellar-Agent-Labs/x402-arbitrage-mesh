@@ -281,7 +281,6 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 					gridAutoRows: "minmax(280px, auto)",
 					gap: "clamp(1rem, 3vw, 3.5rem)",
 					paddingBottom: "3rem",
-					overflow: "hidden",
                     perspective: "1200px" // Required for the Lusion 3D tilt interaction
 				}}
 			>
