@@ -8,5 +8,5 @@ const LiquidGlassShader = dynamic(() => import("./LiquidGlassShader"), {
 });
 
 export default function GlobalBackground() {
-	return <LiquidGlassShader theme="dark" />;
+	return <div className="global-bg-canvas"><LiquidGlassShader theme="dark" /></div>;
 }

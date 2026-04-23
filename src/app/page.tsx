@@ -203,6 +203,12 @@ export default function Page() {
 	const [theme, setTheme] = useState<"dark" | "light">("dark");
 	const p = palette[theme];
 
+	// Lusion postInvert: sync theme to html data-theme for global CSS canvas inversion
+	React.useEffect(() => {
+		document.documentElement.setAttribute("data-theme", theme);
+		document.body.style.backgroundColor = theme === "dark" ? "#000" : "#fff";
+	}, [theme]);
+
 	// Lusion hover states for inline elements
 	const [hoverTheme, setHoverTheme] = useState(false);
 	const [hoverGithub, setHoverGithub] = useState(false);

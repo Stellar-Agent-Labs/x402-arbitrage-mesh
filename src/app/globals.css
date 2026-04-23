@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Lusion postInvert: light theme inverts WebGL canvas (dump: ThemeController line 48903) */
+html[data-theme="light"] .global-bg-canvas {
+	filter: invert(1);
+	transition: filter 0.7s ease;
+}
+html[data-theme="dark"] .global-bg-canvas {
+	filter: invert(0);
+	transition: filter 0.7s ease;
+}
+
 /* Peachworlds Typography: Helvetica Now Display */
 @font-face {
 	font-family: 'Helvetica Now Display';
