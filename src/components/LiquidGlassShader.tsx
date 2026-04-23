@@ -605,6 +605,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 
 	return createPortal(
 		<div
+			className="global-bg-canvas"
 			style={{
 				position: "fixed",
 				inset: 0,
