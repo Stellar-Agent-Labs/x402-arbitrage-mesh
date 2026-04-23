@@ -64,7 +64,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 			initial={{ opacity: 0, y: 150, rotateX: 15, scale: 0.95 }}
 			whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
 			whileHover={{ y: -8, scale: 1.075, zIndex: 10 }}
-			viewport={{ once: false, amount: 0.2 }}
+			viewport={{ once: true, amount: 0.2 }}
 			transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: (index % 2) * 0.15 }}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
