@@ -57,19 +57,19 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 		return () => clearTimeout(timeoutId);
 	}, []);
 
-	// Lusion palette
+	// Lusion palette — always dark (only canvas inverts)
 	const borderColor = hovered 
-		? (theme === "dark" ? "rgba(0,255,65,0.4)" : "rgba(0,100,34,0.3)")
-		: (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)");
+		? "rgba(0,255,65,0.4)"
+		: "rgba(255,255,255,0.1)";
 	// bgColor removed — Peachworlds glass uses inline values
 	const textColor = hovered
-		? (theme === "dark" ? "#00ff41" : "#006622")
-		: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
+		? "#00ff41"
+		: "rgba(255,255,255,0.6)";
 	const headerColor = hovered
-		? (theme === "dark" ? "#00ff41" : "#006622")
-		: (theme === "dark" ? "rgba(255,255,255,0.8)" : "#111");
+		? "#00ff41"
+		: "rgba(255,255,255,0.8)";
 	const glowShadow = hovered
-		? (theme === "dark" ? "0 0 25px rgba(0,255,65,0.2)" : "0 0 20px rgba(0,100,34,0.1)")
+		? "0 0 25px rgba(0,255,65,0.2)"
 		: "none";
 
 	return (
@@ -83,8 +83,8 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 				width: 400,
 				height: 220,
 				background: hovered 
-					? (theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(240,255,245,0.6)")
-					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.45)"),
+					? "rgba(0,15,0,0.4)"
+					: "rgba(255,255,255,0.06)",
 				border: `1px solid ${borderColor}`,
 				borderRadius: 12,
 				padding: 15,
