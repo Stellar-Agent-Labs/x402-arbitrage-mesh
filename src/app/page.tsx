@@ -188,7 +188,6 @@ function ScrollToTop({ theme }: { theme: "dark" | "light" }) {
 }
 
 import HollywoodTelemetry from "@/components/HollywoodTelemetry";
-import LiquidGlassShader from "@/components/LiquidGlassShader";
 import BootSequence from "@/components/BootSequence";
 import GlitchText from "@/components/GlitchText";
 import AgentNetworkGrid from "@/components/AgentNetworkGrid";
@@ -311,7 +310,6 @@ export default function Page() {
 					</motion.a>
 
 					<div style={{ position: "relative", minHeight: "100vh", width: "100%" }}>
-						<LiquidGlassShader theme={theme} />
 
 						<motion.div
 							initial={{ opacity: 0, y: 50 }}
