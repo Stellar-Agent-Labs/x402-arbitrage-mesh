@@ -149,9 +149,9 @@ function ScrollToTop({ theme }: { theme: "dark" | "light" }) {
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
-						background: hovered ? p.glassBgHover : "rgba(10,15,20, 0.6)",
-						border: `1px solid ${hovered ? p.borderHover : "rgba(255,255,255,0.15)"}`,
-						color: hovered ? p.accentHover : "rgba(255,255,255,0.8)",
+						background: hovered ? p.glassBgHover : p.glassBg,
+						border: `1px solid ${hovered ? p.borderHover : p.border}`,
+						color: hovered ? p.accentHover : p.accent,
 						backdropFilter: "blur(40px) saturate(2)",
 						WebkitBackdropFilter: "blur(40px) saturate(2)",
 						cursor: "pointer",
@@ -363,11 +363,9 @@ export default function Page() {
 								style={{
 									marginTop: "4rem",
 									padding: "1.5rem 4rem",
-									border: `1px solid ${hoverCTA ? p.borderHover : "rgba(255,255,255,0.1)"}`,
+									border: `1px solid ${hoverCTA ? p.borderHover : p.border}`,
 									borderRadius: "12px",
-									background: hoverCTA 
-										? (theme === "dark" ? "rgba(0,15,0,0.35)" : "rgba(240,255,245,0.6)")
-										: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.45)"),
+									background: hoverCTA ? p.glassBgHover : p.glassBg,
 									backdropFilter: "blur(24px) saturate(1.2)",
 									WebkitBackdropFilter: "blur(24px) saturate(1.2)",
 									cursor: "pointer",

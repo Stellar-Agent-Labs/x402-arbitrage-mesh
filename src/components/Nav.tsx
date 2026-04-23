@@ -131,9 +131,9 @@ export function Nav() {
 				<button
 					onClick={() => window.location.href = "/dashboard"}
 					style={{
-						background: "transparent",
-						color: "rgba(255,255,255,0.5)",
-						border: "1px solid rgba(255,255,255,0.15)",
+						background: "rgba(10,10,10,0.7)",
+						color: "rgba(255,255,255,0.7)",
+						border: "1px solid rgba(255,255,255,0.2)",
 						padding: "8px 24px",
 						borderRadius: "40px",
 						cursor: "pointer",
@@ -141,17 +141,18 @@ export function Nav() {
 						fontSize: "0.8rem",
 						fontWeight: "bold",
 						letterSpacing: "0.1em",
-						transition: "all 0.2s ease"
+						transition: "all 0.2s ease",
+						backdropFilter: "blur(12px)",
 					}}
 					onMouseEnter={(e) => { 
-						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.1)";
+						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.15)";
 						e.currentTarget.style.color = "#00ff41";
 						e.currentTarget.style.borderColor = "rgba(0, 255, 65, 0.4)";
 					}}
 					onMouseLeave={(e) => { 
-						e.currentTarget.style.backgroundColor = "transparent";
-						e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-						e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+						e.currentTarget.style.backgroundColor = "rgba(10,10,10,0.7)";
+						e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+						e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
 					}}
 				>
 					[ DASHBOARD ]
