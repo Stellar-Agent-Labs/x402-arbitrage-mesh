@@ -74,8 +74,8 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				...gridPlacement,
 				padding: "clamp(1.5rem, 3vw, 3rem)",
 				background: hovered 
-					? (theme === "dark" ? "rgba(0,15,0,0.35)" : "rgba(240,255,245,0.6)")
-					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.45)"),
+					? "rgba(0,15,0,0.45)"
+					: "rgba(255,255,255,0.06)",
 				border: isMark53 ? "none" : `1px solid ${borderColor}`,
 				borderRadius: "24px",
 				backdropFilter: hovered ? "blur(32px) saturate(1.5)" : "blur(24px) saturate(1.2)",
@@ -86,9 +86,9 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				cursor: "crosshair",
 				transition: "background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease",
 				boxShadow: isMark53 
-					? `0 0 60px ${theme === "dark" ? "rgba(255, 215, 0, 0.05)" : "rgba(255, 215, 0, 0.1)"}`
+					? "0 0 60px rgba(255, 215, 0, 0.05)"
 					: hovered 
-						? `0 20px 40px ${theme === "dark" ? "rgba(0,255,65,0.08)" : "rgba(0,100,34,0.05)"}` 
+						? "0 20px 40px rgba(0,255,65,0.08)" 
 						: "none",
                 minHeight: index === 0 || index === 3 || index === 6 ? "240px" : "320px",
                 justifyContent: "space-between",
@@ -105,7 +105,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					fontWeight: 500, 
 					fontSize: "1.4rem", 
 					letterSpacing: "0.02em",
-					color: hovered ? (theme === "dark" ? "#00ff41" : "#006622") : (theme === "dark" ? "#fff" : "#111"),
+					color: hovered ? "#00ff41" : "#fff",
 					transition: lusionTransition,
 				}}>
 					{agent.id}
@@ -133,7 +133,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
                 alignItems: "flex-end",
 				marginTop: "auto", 
 				fontSize: "0.95rem", 
-				color: theme === "dark" ? "rgba(255,255,255,0.6)" : "#666",
+				color: "rgba(255,255,255,0.6)",
                 fontFamily: "'SF Mono', monospace"
 			}}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
