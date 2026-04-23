@@ -83,8 +83,8 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 				width: 400,
 				height: 220,
 				background: hovered 
-					? "rgba(0,15,0,0.4)"
-					: "rgba(255,255,255,0.06)",
+					? (theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(5,15,5,0.95)")
+					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(8,8,8,0.95)"),
 				border: `1px solid ${borderColor}`,
 				borderRadius: 12,
 				padding: 15,
